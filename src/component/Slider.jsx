@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 const images = [
   'https://images.unsplash.com/photo-1506744038136-46273834b3fb', // mountain
@@ -18,8 +18,17 @@ export default function Slider() {
     setCurrent((prev) => (prev === images.length - 1 ? 0 : prev + 1))
   }
 
+  // Auto-play effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      nextSlide()
+    }, 3000) // change slide every 3 seconds
+
+    return () => clearInterval(interval) // cleanup on unmount
+  }, [current]) // runs again whenever 'current' changes
+
   return (
-    <div className="w-full ">
+    <div className="w-full">
       <div className="relative w-[90%] mx-auto overflow-hidden rounded-lg shadow-lg">
         {/* Slide Image */}
         <div className="w-full h-64 sm:h-[30rem]">

@@ -14,6 +14,7 @@ function App() {
     <>
       <Navbar />
       <Slider />
+      {/* <Home /> */}
       <main className="min-h-screen p-4 text-white">
         <Routes>
           <Route path="/" element={<Home />} />
