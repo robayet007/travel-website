@@ -1,3 +1,93 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+
+
+body {
+  font-family: 'Heebo', sans-serif;
+}
+
+.font-new-family
+{
+  font-family: "Bebas Neue", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+  text-align: center;
+  font-size: 3rem;
+}
+
+.shadow
+{
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+/* testing */
+
+.animated-border-container {
+  position: relative;
+  background-color: #111;
+  border-radius: 12px;
+  padding: 2rem;
+  border: 3px solid rgba(255, 0, 128, 0.6);
+  box-shadow: 0 0 15px rgba(255, 0, 128, 0.7);
+  animation: borderGlow 3.5s ease-in-out infinite alternate;
+}
+
+/* Border subtle glowing animation */
+@keyframes borderGlow {
+  0% {
+    border-color: rgba(255, 0, 128, 0.4);
+    box-shadow: 0 0 10px rgba(255, 0, 128, 0.4);
+  }
+  50% {
+    border-color: rgba(255, 0, 128, 0.8);
+    box-shadow: 0 0 20px rgba(255, 0, 128, 0.8);
+  }
+  100% {
+    border-color: rgba(255, 0, 128, 0.4);
+    box-shadow: 0 0 10px rgba(255, 0, 128, 0.4);
+  }
+}
+
+/* Text flicker animation */
+@keyframes flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+    opacity: 1;
+    text-shadow:
+      0 0 5px #ff0080,
+      0 0 10px #ff0080,
+      0 0 20px #ff0080,
+      0 0 40px #ff0080;
+  }
+  20%, 22%, 24%, 55% {
+    opacity: 0.6;
+    text-shadow: none;
+  }
+}
+
+.flicker-text {
+  animation: flicker 3s linear infinite;
+}
+
+@keyframes flickerSub {
+  0%, 50%, 100% {
+    opacity: 1;
+    text-shadow:
+      0 0 4px #ff69b4,
+      0 0 8px #ff69b4;
+  }
+  25%, 75% {
+    opacity: 0.7;
+    text-shadow: none;
+  }
+}
+
+.flicker-subtext {
+  animation: flickerSub 5s linear infinite;
+}
+
+
+
+

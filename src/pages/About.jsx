@@ -1,4 +1,4 @@
-
+import { Link } from 'react-router-dom';
 
 "use client"
 
@@ -25,12 +25,13 @@ export default function About() {
         <div className="grid items-start grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
           {/* Left Side - Office Image */}
           <div className="w-full">
-            <div className="relative">
+            <div className="relative flex items-center justify-center mt-10">
               <img
-                src="/placeholder.svg?height=500&width=600"
-                alt="Fly Easy Tours & Travels Office"
-                className="object-cover w-full h-auto rounded-lg shadow-lg"
+              src="/travel-website/mainimg.jpg"
+              alt="Fly Easy Tours & Travels Office"
+              className=" overflow-hidden object-cover w-[700px] h-[500px] rounded-lg shadow-lg hover:scale-110 transition-transform duration-300"
               />
+
             </div>
           </div>
 
@@ -40,7 +41,10 @@ export default function About() {
             <div className="mb-6">
               <div className="flex items-center mb-3">
                 <h2 className="text-sm font-semibold tracking-wider text-blue-500 uppercase">ABOUT US</h2>
-                <div className="ml-3 h-0.5 w-8 bg-green-500"></div>
+                <div className="grid grid-flow-row gap-1 green-line">
+                  <div className="ml-3 h-0.5 w-8 bg-green-400 "></div>
+                <div className="ml-3 h-0.5 w-14 bg-green-500"></div>
+                </div>
               </div>
               <h1 className="mb-4 text-2xl font-bold leading-tight text-gray-900 md:text-3xl lg:text-4xl">
                 Welcome to <span className="text-blue-500">Our Travels Agency</span>
@@ -54,7 +58,7 @@ export default function About() {
                 travel agency.
               </p>
               <p className="text-sm leading-relaxed text-gray-600">
-                <span className="font-semibold">***Travel with ease, avoid health risks.***</span>
+                <span className="font-bold">***TRAVEL WITH EASY, AVOID HEALTH RISKS***</span>
               </p>
               <p className="text-sm leading-relaxed text-gray-600">
                 "Health is the root of all happiness"—The first aim of our service is to ensure the physical health of
@@ -72,11 +76,12 @@ export default function About() {
               <div className="space-y-2">
                 {leftServices.map((service, index) => (
                   <div key={index} className="flex items-center">
-                    <div className="flex-shrink-0 w-4 h-4 mr-3">
+                    <div className="flex-shrink-0 w-6 h-6 mr-3">
                       <svg className="w-full h-full text-blue-500" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
                       </svg>
                     </div>
+                    {/* </div> */}
                     <span className="text-sm text-gray-600">{service}</span>
                   </div>
                 ))}
@@ -86,11 +91,12 @@ export default function About() {
               <div className="space-y-2">
                 {rightServices.map((service, index) => (
                   <div key={index} className="flex items-center">
-                    <div className="flex-shrink-0 w-4 h-4 mr-3">
+                    <div className="flex-shrink-0 w-6 h-6 mr-3">
                       <svg className="w-full h-full text-blue-500" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
                       </svg>
                     </div>
+
                     <span className="text-sm text-gray-600">{service}</span>
                   </div>
                 ))}
@@ -99,9 +105,13 @@ export default function About() {
 
             {/* Read More Button */}
             <div>
+              <Link
+              to='/services'
+              >
               <button className="px-6 py-3 font-medium text-white transition-colors duration-200 bg-green-500 rounded hover:bg-green-600">
                 Read More
               </button>
+              </Link>
             </div>
           </div>
         </div>

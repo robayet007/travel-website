@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
 
 const images = [
-  'https://images.unsplash.com/photo-1506744038136-46273834b3fb', // mountain
-  'https://images.unsplash.com/photo-1525097487452-6278ff080c31', // forest
-  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e', // ocean
-  'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d', // sunset
+  '/travel-website/slide-1.jpg', // mountain
+  '/travel-website/slide-2.jpg', // forest
+  '/travel-website/slide-3.jpg', // ocean
+  '/travel-website/slide-2.jpg', // sunset
 ]
 
 export default function Slider() {
@@ -28,14 +28,14 @@ export default function Slider() {
   }, [current]) // runs again whenever 'current' changes
 
   return (
-    <div className="w-full">
+    <div className="w-full mt-5 ">
       <div className="relative w-[90%] mx-auto overflow-hidden rounded-lg shadow-lg">
         {/* Slide Image */}
-        <div className="w-full h-64 sm:h-[30rem]">
+        <div className="relative w-full h-64 sm:h-[30rem] overflow-hidden]">
           <img
             src={`${images[current]}?auto=format&fit=crop&w=1600&q=80`}
             alt={`Slide ${current}`}
-            className="object-cover w-full h-full transition-all duration-500"
+            className="w-full h-full transition-all duration-500 "
           />
         </div>
 

@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom';
 import { FaGlobe, FaPlaneDeparture, FaHotel, FaRoute, FaPassport, FaHeadset } from 'react-icons/fa'
 
 export default function Services() {
@@ -29,7 +30,7 @@ export default function Services() {
       desc: 'Complete guidance on visa applications, documentation, and appointment scheduling.',
     },
     {
-      icon: <FaHeadset className="mb-4 text-3xl text-purple-700" />,
+      icon: <FaHeadset className="mb-4 text-3xl text-purple-700 " />,
       title: '24/7 Travel Support',
       desc: 'We’re with you every step of the way — before, during, and after your journey.',
     },
@@ -52,7 +53,7 @@ export default function Services() {
       {/* Services Grid */}
       <div className="grid max-w-6xl gap-8 mx-auto sm:grid-cols-2 md:grid-cols-3">
         {services.map((service, index) => (
-          <div key={index} className="p-6 text-center transition bg-white rounded-lg shadow hover:shadow-md">
+          <div key={index} className="p-6 text-center transition-transform duration-300 bg-white rounded-lg shadow hover:scale-105 hover:shadow-md">
             {service.icon}
             <h3 className="mb-2 text-xl font-semibold">{service.title}</h3>
             <p className="text-gray-600">{service.desc}</p>
@@ -63,12 +64,12 @@ export default function Services() {
       {/* Call to Action */}
       <div className="mt-20 text-center">
         <h2 className="mb-4 text-2xl font-bold">Ready to plan your perfect trip?</h2>
-        <a
-          href="/contact"
+        <Link
+          to="/contact"
           className="inline-block px-6 py-3 font-semibold text-white transition rounded-md shadow bg-gradient-to-r from-purple-800 via-pink-600 to-orange-500 hover:opacity-90"
         >
           Contact Us Now
-        </a>
+        </Link>
       </div>
     </div>
   )

@@ -14,6 +14,7 @@ import {
     { name: 'Home', href: '/' },
     { name: 'About', href: '/about' },
     { name: 'Services', href: '/services' },
+    { name: 'Hajj Package', href: '/hajj' },
     { name: 'Contact', href: '/contact' },
   ]
   
@@ -43,7 +44,7 @@ import {
               <div className="flex items-center shrink-0">
               <img
                   alt="Travel Logo"
-                  src="/travel-logo.png"
+                  src="/travel-website/logo.png"
                   className="w-10 h-10 p-1 bg-white rounded-full shadow-sm"
                 />
               </div>
@@ -119,9 +120,15 @@ import {
                 </MenuItems>
               </Menu> */}
             </div>
-            <button className="px-6 py-2 font-semibold text-white rounded-md shadow bg-white/20 hover:bg-white/30 backdrop-blur-sm">
-                 Get Started
-            </button>
+            <button
+      className="flex items-center gap-2 px-4 py-2 text-white transition bg-blue-600 rounded-lg hover:bg-blue-700">
+        <img
+        src="https://cdn-icons-png.flaticon.com/512/733/733547.png"
+        alt="Facebook"
+        className="w-5 h-5"
+        />
+            Facebook
+         </button>
           </div>
         </div>
   

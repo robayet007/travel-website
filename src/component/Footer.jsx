@@ -13,25 +13,27 @@ export default function Footer() {
   }
 
   const galleryImages = [
-    "/placeholder.svg?height=80&width=80",
-    "/placeholder.svg?height=80&width=80",
-    "/placeholder.svg?height=80&width=80",
-    "/placeholder.svg?height=80&width=80",
-    "/placeholder.svg?height=80&width=80",
-    "/placeholder.svg?height=80&width=80",
+    "/travel-website/Gallery-01.jpg?height=30&width=80",
+    "/travel-website/Gallery-02.jpg?height=30&width=80",
+    "/travel-website/Gallery-03.jpg?height=30&width=80",
+    "/travel-website/Gallery-04.jpg?height=30&width=80",
+    "/travel-website/Gallery-05.jpg?height=30&width=80",
+    "/travel-website/Gallery-06.jpg?height=30&width=80",
   ]
 
   const airlineLogos = [
-    "/placeholder.svg?height=40&width=80",
-    "/placeholder.svg?height=40&width=80",
-    "/placeholder.svg?height=40&width=80",
-    "/placeholder.svg?height=40&width=80",
-    "/placeholder.svg?height=40&width=80",
-    "/placeholder.svg?height=40&width=80",
-    "/placeholder.svg?height=40&width=80",
-    "/placeholder.svg?height=40&width=80",
-    "/placeholder.svg?height=40&width=80",
-  ]
+  "/travel-website/AirlinesSupport-01.png",
+  "/travel-website/AirlinesSupport-02.png",
+  "/travel-website/AirlinesSupport-03.png",
+  "/travel-website/AirlinesSupport-04.png",
+  "/travel-website/AirlinesSupport-05.png",
+  "/travel-website/AirlinesSupport-06.png",
+  "/travel-website/AirlinesSupport-07.png",
+  "/travel-website/AirlinesSupport-04.png",
+  "/travel-website/AirlinesSupport-04.png",
+  // ...repeat as needed
+]
+ 
 
   return (
     <footer className="relative text-white bg-gray-900">

@@ -1,13 +1,37 @@
 // src/pages/Home.jsx
 import React from 'react'
+import About from './About'
 import { Link } from 'react-router-dom'
+import '../index.css'
+import ContactRepresentatives from '../component/ContactRepresentatives'
 
 export default function Home() {
   return (
     <div className="text-gray-800 bg-white">
 
+
+      {/* testing */}
+      <div className="max-w-lg p-8 mx-auto text-center animated-border-container font-new-family">
+  <h2 className="mb-4 text-3xl font-bold flicker-text md:text-4xl">
+    FLY EASY TOURS & TRAVELS
+  </h2>
+  <h4 className="text-xl italic flicker-subtext">
+    "TRAVEL WITH EASY, AVOID HEALTH RISKS"
+  </h4>
+</div>
+
+
+
+
+
+
+
+      {/* testing */}
+
       {/* Hero Section */}
-      
+     {/* <h2 className='p-2 font-new-family'>FLY EASY TOURS & TRAVELS</h2>
+     <h4 className='p-2 font-new-family '>"TRAVEL WITH EASY, AVOID  HEALTH RISKS"</h4> */}
+      <About/>
 
       {/* Popular Destinations */}
       {/* Popular Destinations */}
@@ -17,32 +41,32 @@ export default function Home() {
     <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3">
       {[
         {
-          name: 'Santorini, Greece',
-          img: 'https://upload.wikimedia.org/wikipedia/commons/0/0e/Santorini_Thira.jpg',
+          name: 'Holly Mecca Sharif',
+          img: '/travel-website/makka.png',
         },
         {
-          name: 'Kyoto, Japan',
-          img: 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Kiyomizu-dera_Temple%2C_Kyoto%2C_Japan.jpg',
+          name: 'Dubai',
+          img: '/travel-website/destination-02.png',
         },
         {
-          name: 'Paris, France',
-          img: 'https://upload.wikimedia.org/wikipedia/commons/a/a8/Tour_Eiffel_Wikimedia_Commons.jpg',
+          name: 'Madina Sharif',
+          img: '/travel-website/madina.png',
         },
         {
-          name: 'Bali, Indonesia',
-          img: 'https://upload.wikimedia.org/wikipedia/commons/f/f5/Pura_Ulun_Danu_Bratan%2C_Bali%2C_Indonesia.jpg',
+          name: 'New York , USA',
+          img: '/travel-website/usa.png',
         },
         {
           name: 'Swiss Alps',
-          img: 'https://upload.wikimedia.org/wikipedia/commons/4/4f/Matterhorn_from_Domh%C3%BCtte_-_2.jpg',
+          img: '/travel-website/destination-05.jpg',
         },
         {
-          name: 'New York City',
-          img: 'https://upload.wikimedia.org/wikipedia/commons/4/4d/Manhattan_at_Dusk_by_slonecker.jpg',
+          name: 'Indonessia',
+          img: '/travel-website/destination-01.jpg',
         },
       ].map((item, index) => (
         <div key={index} className="overflow-hidden transition bg-white rounded-lg shadow hover:shadow-lg">
-          <img src={item.img} alt={item.name} className="object-cover w-full h-48" />
+          <img src={item.img} alt={item.name} className="object-cover w-full h-48 transition-transform duration-300 cursor-pointer hover:scale-110" />
           <div className="p-4">
             <h3 className="text-lg font-semibold">{item.name}</h3>
           </div>
@@ -54,7 +78,7 @@ export default function Home() {
 
 
       {/* How It Works */}
-      <section className="py-20">
+      {/* <section className="py-20">
         <div className="max-w-5xl px-4 mx-auto text-center">
           <h2 className="mb-12 text-3xl font-bold">How It Works</h2>
           <div className="grid gap-8 text-left md:grid-cols-3">
@@ -73,7 +97,7 @@ export default function Home() {
       </section>
 
       {/* Why Choose Us */}
-      <section className="py-20 text-white bg-gradient-to-r from-purple-800 via-pink-600 to-orange-500">
+      {/* <section className="py-20 text-white bg-gradient-to-r from-purple-800 via-pink-600 to-orange-500">
         <div className="max-w-6xl px-4 mx-auto">
           <h2 className="mb-12 text-3xl font-bold text-center">Why Travel With TravelWave?</h2>
           <div className="grid gap-6 text-center sm:grid-cols-2 md:grid-cols-3">
@@ -91,15 +115,14 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </section>  */}
 
       {/* Final CTA */}
       <section className="py-20 text-center">
-        <h2 className="mb-4 text-3xl font-bold">Your next adventure starts here</h2>
-        <p className="mb-6 text-gray-600">Let TravelWave help you create unforgettable memories today.</p>
-        <Link to="/contact" className="px-6 py-3 font-semibold text-white transition bg-purple-700 rounded-md shadow hover:bg-purple-800">
+        <ContactRepresentatives/>
+        {/* <Link to="/contact" className="px-6 py-3 font-semibold text-white transition bg-purple-700 rounded-md shadow hover:bg-purple-800">
           Plan a Trip
-        </Link>
+        </Link> */}
       </section>
     </div>
   )
