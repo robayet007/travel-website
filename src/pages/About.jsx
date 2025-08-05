@@ -46,19 +46,19 @@ export default function About() {
                 <div className="ml-3 h-0.5 w-14 bg-green-500"></div>
                 </div>
               </div>
-              <h1 className="mb-4 text-2xl font-bold leading-tight text-gray-900 md:text-3xl lg:text-4xl">
+              <h1 className="mb-4 text-2xl font-bold leading-tight text-center text-gray-900 md:text-3xl lg:text-4xl">
                 Welcome to <span className="text-blue-500">Our Travels Agency</span>
               </h1>
             </div>
 
             {/* Description Text */}
             <div className="mb-8 space-y-3">
-              <p className="text-sm leading-relaxed text-gray-600">
-                <span className="font-semibold">"FLY EASY TOURS & TRAVELS"</span> is a modern quality and standard
+              <p className="text-sm leading-relaxed text-center text-gray-600">
+                <span className="font-semibold transition-colors hover:text-blue-500">"FLY EASY TRAVELS"</span> is a modern quality and standard
                 travel agency.
               </p>
-              <p className="text-sm leading-relaxed text-gray-600">
-                <span className="font-bold">***TRAVEL WITH EASY, AVOID HEALTH RISKS***</span>
+              <p className="text-sm leading-relaxed text-center text-gray-600 pointer">
+                <span className="font-bold transition-colors hover:text-blue-500">***TRAVEL WITH EASY, AVOID HEALTH RISKS***</span>
               </p>
               <p className="text-sm leading-relaxed text-gray-600">
                 "Health is the root of all happiness"—The first aim of our service is to ensure the physical health of

@@ -1,8 +1,6 @@
+import { Globe } from "@/components/magicui/globe";
 
 
+export default function Hajj() {
 
-export default function Hajj(){
-  return(
-    <div></div>
-  )
 }

@@ -29,8 +29,8 @@ export default function Footer() {
   "/travel-website/AirlinesSupport-05.png",
   "/travel-website/AirlinesSupport-06.png",
   "/travel-website/AirlinesSupport-07.png",
-  "/travel-website/AirlinesSupport-04.png",
-  "/travel-website/AirlinesSupport-04.png",
+  "/travel-website/AirlinesSupport-08.png",
+  "/travel-website/AirlinesSupport-09.png",
   // ...repeat as needed
 ]
  
@@ -173,7 +173,7 @@ export default function Footer() {
         <div className="pt-8 mt-12 border-t border-gray-700">
           <div className="flex flex-col items-center justify-between md:flex-row">
             <div className="mb-4 text-sm text-gray-400 md:mb-0">
-              {/* © Zobayer Ahmad, All Right Reserved. Designed By <span className="text-cyan-400">HTML/CSS/JS</span> */}
+              © Zobayer Ahmad, All Right Reserved. Designed By <span className="text-cyan-400"></span>
             </div>
             <div className="flex space-x-6">
               <a href="#" className="text-sm text-gray-400 transition-colors hover:text-white">

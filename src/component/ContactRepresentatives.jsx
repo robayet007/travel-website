@@ -23,8 +23,8 @@ const teamMembers = [
   },
   {
     id: 3,
-    name: "Zakir Hossen",
-    position: "Manager",
+    name: "Robayet Islam",
+    position: "Office Administrator",
     image: "/placeholder.svg?height=400&width=300&text=Professional+Man+in+Suit",
     facebook: "https://facebook.com/zakir.hossen",
     twitter: "https://twitter.com/zakir_hossen",
@@ -32,7 +32,7 @@ const teamMembers = [
   },
   {
     id: 4,
-    name: "Zavian Zeus",
+    name: "Zakir Hossen",
     position: "Manager",
     image: "/placeholder.svg?height=400&width=300&text=Professional+Man+in+Suit",
     facebook: "https://facebook.com/zavian.zeus",
@@ -47,10 +47,16 @@ export default function ContactRepresentatives() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-12 text-center">
-          <div className="flex items-center justify-center mb-6">
-            <div className="h-0.5 bg-yellow-400 w-16"></div>
+          <div className="relative flex items-center justify-center mb-6 ">
+            <div className="flex flex-col items-end">
+              <div className="h-0.5 bg-yellow-400 w-10 mb-2"></div>
+              <div className="h-0.5 bg-yellow-400 w-16 "></div>
+            </div>
             <span className="mx-4 text-sm font-medium tracking-wider text-blue-600">TRAVEL GUIDE</span>
-            <div className="h-0.5 bg-yellow-400 w-16"></div>
+            <div className="flex flex-col ">
+              <div className="h-0.5 bg-yellow-400 w-10 mb-2 "></div>
+              <div className="h-0.5 bg-yellow-400 w-16"></div>
+            </div>
           </div>
           <h1 className="text-4xl font-bold text-gray-700">Contact Our Representative</h1>
         </div>
