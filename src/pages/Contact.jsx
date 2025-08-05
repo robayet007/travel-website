@@ -2,7 +2,7 @@ import React from 'react'
 
 export default function Contact() {
   return ( 
- <div className='relative flex flex-col items-center gap-6 md:flex-row md:justify-evenly'>
+<div className='flex flex-col items-center gap-5 sm:flex-row sm:justify-center'>
      <div className="flex flex-col justify-center space-y-8 ml-50 ">
         <div className=''>
           <h2 className="mb-4 text-4xl font-bold text-gray-800">Get In Touch</h2>
@@ -14,7 +14,7 @@ export default function Contact() {
         <div className="space-y-6">
           {/* Office */}
           <div className="flex items-start space-x-4">
-            <div className="flex items-center justify-center flex-shrink-0 bg-green-500 rounded w-14 h-14">
+            <div className="flex justify-center flex-shrink-0 bg-green-500 rounded w-14 h-14">
               <svg className="text-white w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
@@ -74,7 +74,7 @@ export default function Contact() {
         </div>
       </div>
 
-// right part
+    // right part
 
     <div className="flex-col items-center justify-center px-4 py-16 text-gray-800 align-bottom min-h felx">
       <div className="max-w-4xl mx-auto mb-12 text-center">
@@ -136,6 +136,6 @@ export default function Contact() {
         </div>
       </form>
     </div>
-    </div>
+</div>
   )
 }
