@@ -16,6 +16,7 @@ import {
     { name: 'Services', href: '/services' },
     { name: 'Hajj Package', href: '/hajj' },
     { name: 'Contact', href: '/contact' },
+    { href: '/landServices'}
   ]
   
   function classNames(...classes) {
@@ -28,9 +29,9 @@ import {
     return (
       <Disclosure as="nav" className="sticky top-0 z-50 bg-gradient-to-r from-black via-gray-900 to-gray-700">
         <div className="px-2 mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="relative flex items-center justify-between h-16">
+          <div className="relative flex items-center h-16">
             {/* Mobile menu button */}
-            <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
+            <div className="absolute inset-y-0 right-0 flex items-center sm:hidden">
               <DisclosureButton className="relative inline-flex items-center justify-center p-2 text-gray-400 rounded-md group hover:gray-red-700 hover:text-white focus:ring-2 focus:ring-white focus:outline-hidden focus:ring-inset">
                 <span className="absolute -inset-0.5" />
                 <span className="sr-only">Open main menu</span>
@@ -71,70 +72,36 @@ import {
   
             {/* Profile + Bell */}
             <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-              {/* <button
-                type="button"
-                className="relative p-1 text-gray-400 bg-gray-800 rounded-full hover:text-white focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-hidden"
-              >
-                <span className="absolute -inset-1.5" />
-                <span className="sr-only">View notifications</span>
-                <BellIcon aria-hidden="true" className="size-6" />
-              </button> */}
-  
-              {/* Profile dropdown */}
-              {/* <Menu as="div" className="relative ml-3">
-                <div>
-                  <MenuButton className="relative flex text-sm bg-gray-800 rounded-full focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-hidden">
-                    <span className="absolute -inset-1.5" />
-                    <span className="sr-only">Open user menu</span>
+ 
+              <div className="items-center hidden gap-3 sm:flex">
+                <a href='https://www.facebook.com/FlyEasyTravelsBD?rdid=cHA0obi5rUFhWqeD&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1CbGCL31TH%2F#'>
+                  <button
+                    className="flex items-center gap-2 px-4 py-2 text-white transition bg-blue-600 rounded-lg hover:bg-blue-700 hover:scale-110">
                     <img
-                      alt=""
-                      src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                      className="rounded-full size-8"
+                      src="https://cdn-icons-png.flaticon.com/512/733/733547.png"
+                      alt="Facebook"
+                      className="w-5 h-5"
                     />
-                  </MenuButton>
-                </div>
-                <MenuItems className="absolute right-0 z-10 w-48 py-1 mt-2 transition origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black/5 focus:outline-hidden">
-                  <MenuItem>
-                    <a
-                      href="#"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Your Profile
-                    </a>
-                  </MenuItem>
-                  <MenuItem>
-                    <a
-                      href="#"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Settings
-                    </a>
-                  </MenuItem>
-                  <MenuItem>
-                    <a
-                      href="#"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Sign out
-                    </a>
-                  </MenuItem>
-                </MenuItems>
-              </Menu> */}
+                    Facebook
+                  </button>
+                </a>
+
+                <Link
+                  to="/landServices"
+                  className="px-6 py-2 font-semibold text-white transition rounded-md shadow bg-gradient-to-r from-purple-800 via-pink-600 to-orange-500 hover:opacity-90"
+                >
+                  Land Services
+                </Link>
+                
+              </div>
             </div>
-         <a href='https://www.facebook.com/FlyEasyTravelsBD?rdid=cHA0obi5rUFhWqeD&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1CbGCL31TH%2F#'>
-          <button
-           className="flex items-center gap-2 px-4 py-2 text-white transition bg-blue-600 rounded-lg hover:bg-blue-700 hover:scale-110">
-        <img
-        src="https://cdn-icons-png.flaticon.com/512/733/733547.png"
-        alt="Facebook"
-        className="w-5 h-5"
-        />
-            Facebook
-         </button>
-         </a>
+            
+  
+
+                
           </div>
         </div>
-  
+
         {/* Mobile Nav Panel */}
         <DisclosurePanel className="sm:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1">

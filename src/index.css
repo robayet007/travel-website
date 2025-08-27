@@ -2,9 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
-
-
 body {
   font-family: 'Heebo', sans-serif;
 }
@@ -23,27 +20,13 @@ body {
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
-
 /* font  */
-
-
-
-
-
-
-
-
-
 
 .chewy-regular {
   font-family: "Chewy", system-ui;
   font-weight: 400;
   font-style: normal;
 }
-
-
-
-
 
 /* testing */
 
@@ -175,6 +158,10 @@ body {
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
+  .theme {
+    --animate-marquee: marquee var(--duration) infinite linear;
+    --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+  }
 }
 
 /* ---break---  */
@@ -188,4 +175,23 @@ body {
   }
 }
 
+/* ---break---  */
 
+@theme inline {
+  @keyframes marquee {
+  from {
+    transform: translateX(0);
+    }
+  to {
+    transform: translateX(calc(-100% - var(--gap)));
+    }
+  }
+  @keyframes marquee-vertical {
+  from {
+    transform: translateY(0);
+    }
+  to {
+    transform: translateY(calc(-100% - var(--gap)));
+    }
+  }
+}

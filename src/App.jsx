@@ -9,6 +9,7 @@ import About from './pages/About'
 import Services from './pages/Services'
 import Contact from './pages/Contact'
 import Hajj from './pages/Hajj'
+import LandServices from './pages/LandServices'
 
 function App() {
   return (
@@ -17,13 +18,14 @@ function App() {
       <Slider />
       {/* <About /> */}
       {/* <Home /> */}
-      <main className="min-h-screen p-4 text-white">
+      <main className="min-h-screen text-white">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/hajj" element={<Hajj />} />
           <Route path="/services" element={<Services />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/landServices" element={<LandServices />} />
         </Routes>
       </main>
       <Footer />
@@ -31,4 +33,4 @@ function App() {
   )
 }
 
-export default App
+export default App;

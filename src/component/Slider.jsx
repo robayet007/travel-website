@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
 
 const images = [
-  '/travel-website/slide-1.jpg', // mountain
+  // '/travel-website/slide-1.jpg', // mountain
   '/travel-website/slide-2.jpg', // forest
   '/travel-website/slide-3.jpg', // ocean
-  '/travel-website/slide-2.jpg', // sunset
+  // '/travel-website/slide-2.jpg', // sunset
 ]
 
 export default function Slider() {

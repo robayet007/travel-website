@@ -3,7 +3,6 @@ import React from 'react'
 import About from './About'
 import { Link } from 'react-router-dom'
 import '../index.css'
-import { Globe } from "@/components/magicui/globe";
 import ContactRepresentatives from '../component/ContactRepresentatives'
 
 export default function Home() {
@@ -11,7 +10,7 @@ export default function Home() {
     <div className="text-gray-800 bg-white">
 
 
-      {/* testing */}
+      {/* hero*/}
       <div className="max-w-lg p-8 mx-auto text-center animated-border-container font-new-family">
         <h2 className="text-4xl font-bold tracking-widest sm:text-6xl md:text-7xl lg:text-8xl flicker-text">
            FLY EASY TRAVELS
@@ -21,17 +20,6 @@ export default function Home() {
         </h4>
      </div>
 
-
-
-
-
-
-
-      {/* testing */}
-
-      {/* Hero Section */}
-     {/* <h2 className='p-2 font-new-family'>FLY EASY TOURS & TRAVELS</h2>
-     <h4 className='p-2 font-new-family '>"TRAVEL WITH EASY, AVOID  HEALTH RISKS"</h4> */}
       <About/>
 
       {/* Popular Destinations */}
@@ -77,11 +65,13 @@ export default function Home() {
       </div>
 </section>
 
-  <Globe />
+{/*  */}
+  
 
       <section className="py-20 text-center">
         <ContactRepresentatives/>
      </section>
     </div>
+
   )
 }
