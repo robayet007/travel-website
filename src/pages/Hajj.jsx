@@ -50,7 +50,7 @@ export default function Hajj() {
                     <div className="flex flex-col justify-between p-6 bg-white border border-gray-200 shadow-lg rounded-[20px] hover:shadow-xl group">
                         <div>
                             <div className="overflow-hidden rounded-[20px] h-80 mb-4 -mx-6 -mt-6">
-                                <img src="/travel-website/hajj-img.jpg" alt="Standard Umrah Package" className="object-cover object-center w-full h-full transition-transform duration-300 ease-out group-hover:scale-105" />
+                                <img src="/hajj-img.jpg" alt="Standard Umrah Package" className="object-cover object-center w-full h-full transition-transform duration-300 ease-out group-hover:scale-105" />
                             </div>
                             <h3 className="text-xl font-semibold text-center text-gray-900">Standard</h3>
                             <div className="mt-4">

@@ -9,7 +9,7 @@ export default function LandServices() {
       }}
     >
       <img
-        src="/travel-website/land-services-img.jpg"
+        src="/land-services-img.jpg"
         alt="Land Services"
         style={{
           height: "100%",

@@ -45,7 +45,7 @@ import {
               <div className="flex items-center shrink-0">
               <img
                   alt="Travel Logo"
-                  src="/travel-website/logo.png"
+                  src="/logo.png"
                   className="w-10 h-10 p-1 bg-white rounded-full shadow-sm "
                 />
               </div>

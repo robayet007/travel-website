@@ -27,7 +27,7 @@ export default function About() {
           <div className="w-full">
             <div className="relative flex items-center justify-center mt-10">
               <img
-              src="/travel-website/mainimg.jpg"
+              src="/mainimg.jpg"
               alt="Fly Easy Tours & Travels Office"
               className=" overflow-hidden object-cover w-[700px] h-[500px] rounded-lg shadow-lg hover:scale-110 transition-transform duration-300"
               />
