@@ -9,6 +9,7 @@ import {
   } from '@headlessui/react'
   import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
   import { Link, useLocation } from 'react-router-dom'
+import TourPackages from '../pages/TourPackges'
   
   const navigation = [
     { name: 'Home', href: '/' },
@@ -16,7 +17,6 @@ import {
     { name: 'Services', href: '/services' },
     { name: 'Hajj Package', href: '/hajj' },
     { name: 'Contact', href: '/contact' },
-    { href: '/landServices'}
   ]
   
   function classNames(...classes) {
@@ -66,6 +66,7 @@ import {
                       {item.name}
                     </Link>
                   ))}
+                <TourPackages/>
                 </div>
               </div>
             </div>

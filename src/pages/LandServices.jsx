@@ -5,7 +5,8 @@ export default function LandServices() {
     <div 
       style={{
         height: "100vh",
-        width: "100vw"
+        width: "100vw",
+        padding: "1rem",
       }}
     >
       <img

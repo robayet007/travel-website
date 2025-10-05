@@ -16,7 +16,7 @@ const teamMembers = [
     id: 2,
     name: "Zobayer Ahmmad",
     position: "Director",
-    image: "/travel-website/p1.png",
+    image: "/p1.png",
     facebook: "https://facebook.com/zobayer.ahmmad",
     twitter: "https://twitter.com/zobayer_ahmmad",
     instagram: "https://instagram.com/zobayer.ahmmad",
