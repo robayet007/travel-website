@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'; 
+import FormServices from './FormServices';
 
 "use client"
 
@@ -116,6 +117,8 @@ export default function About() {
           </div>
         </div>
       </div>
+      <FormServices/>
     </section>
+
   )
 }
