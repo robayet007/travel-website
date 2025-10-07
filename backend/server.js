@@ -18,7 +18,7 @@ server.use("/api/umrah", umrahRoutes);
 
 // Home route
 server.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.send("Hello World! Server is Up 🚀");
 })
 
 connectDb(database_url)
