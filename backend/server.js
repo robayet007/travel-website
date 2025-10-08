@@ -3,11 +3,13 @@ import dotenv from "dotenv";
 import cors from "cors";
 import connectDb from "./config/db.js";
 import umrahRoutes from "./Routes/umrahRoutes.js"
-const server = express()
-const port = process.env.PORT || 5000;
-const database_url = process.env.database_url || "mongodb+srv://mohammadrobayet009_db_user:vkWbkhEYvOaGuv9i@cluster0.a9bbtmw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
-// dotenv.config(); // .env file load করবে
+
+dotenv.config(); // .env file load করবে
+// server 
+const server = express()
+const port = process.env.PORT
+const database_url = process.env.database_url
 // JSON parsing middleware
 server.use(cors());
 server.use(express.json({ limit: "10mb" })); // <-- increase this
