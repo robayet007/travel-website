@@ -1,6 +1,8 @@
 import React from 'react'
 import { Link } from 'react-router-dom';
 import { FaGlobe, FaPlaneDeparture, FaHotel, FaRoute, FaPassport, FaHeadset } from 'react-icons/fa'
+import FromServices from "./FormServices"
+import FormServices from './FormServices';
 
 export default function Services() {
   const services = [
@@ -71,6 +73,7 @@ export default function Services() {
           Contact Us Now
         </Link>
       </div>
+      <FormServices/>
     </div>
   )
 }

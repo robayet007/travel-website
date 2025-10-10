@@ -10,12 +10,12 @@ export default function Footer() {
   }
 
   const galleryImages = [
-    "/Gallery-01.jpg?height=30&width=80",
+    "/mainimg.jpg?height=30&width=80",
     "/Gallery-02.jpg?height=30&width=80",
     "/Gallery-03.jpg?height=30&width=80",
     "/Gallery-04.jpg?height=30&width=80",
     "/Gallery-05.jpg?height=30&width=80",
-    "/Gallery-06.jpg?height=30&width=80",
+    "/Gallery-06.jpg?height=30&width=80"
   ]
 
   const airlineLogos = [
@@ -27,7 +27,7 @@ export default function Footer() {
     "/AirlinesSupport-06.png",
     "/AirlinesSupport-07.png",
     "/AirlinesSupport-08.png",
-    "/Air.png",
+    "/AirlinesSupport-09.png",
   ]
 
   return (
@@ -134,7 +134,7 @@ export default function Footer() {
 
                 {/* WhatsApp */}
                 <a
-                  href="https://whatspp.roboayet.com"
+                  href="https://wa.me/8801959328100"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center w-8 h-8 transition-colors bg-gray-700 rounded-full hover:bg-green-500"

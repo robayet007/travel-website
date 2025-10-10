@@ -3,15 +3,15 @@ import { Link } from "react-router-dom"
 import '../index.css'
 
 const teamMembers = [
-  {
-    id: 1,
-    name: "Zahirul Islam",
-    position: "Founder & Chairman",
-    image: "/placeholder.svg?height=400&width=300&text=Professional+Man+in+Suit",
-    facebook: "https://facebook.com/zahirul.islam",
-    twitter: "https://twitter.com/zahirul_islam",
-    instagram: "https://instagram.com/zahirul.islam",
-  },
+  // {
+  //   id: 1,
+  //   name: "Zahirul Islam",
+  //   position: "Founder & Chairman",
+  //   image: "/placeholder.svg?height=400&width=300&text=Professional+Man+in+Suit",
+  //   facebook: "https://facebook.com/zahirul.islam",
+  //   twitter: "https://twitter.com/zahirul_islam",
+  //   instagram: "https://instagram.com/zahirul.islam",
+  // },
   {
     id: 2,
     name: "Zobayer Ahmmad",
@@ -21,24 +21,24 @@ const teamMembers = [
     twitter: "https://twitter.com/zobayer_ahmmad",
     instagram: "https://instagram.com/zobayer.ahmmad",
   },
-  {
-    id: 3,
-    name: "Robayet Islam",
-    position: "Office Administrator",
-    image: "/placeholder.svg?height=400&width=300&text=Professional+Man+in+Suit",
-    facebook: "https://facebook.com/zakir.hossen",
-    twitter: "https://twitter.com/zakir_hossen",
-    instagram: "https://instagram.com/zakir.hossen",
-  },
-  {
-    id: 4,
-    name: "Zakir Hossen",
-    position: "Manager",
-    image: "/placeholder.svg?height=400&width=300&text=Professional+Man+in+Suit",
-    facebook: "https://facebook.com/zavian.zeus",
-    twitter: "https://twitter.com/zavian_zeus",
-    instagram: "https://instagram.com/zavian.zeus",
-  },
+  // {
+  //   id: 3,
+  //   name: "Robayet Islam",
+  //   position: "Office Administrator",
+  //   image: "/placeholder.svg?height=400&width=300&text=Professional+Man+in+Suit",
+  //   facebook: "https://facebook.com/zakir.hossen",
+  //   twitter: "https://twitter.com/zakir_hossen",
+  //   instagram: "https://instagram.com/zakir.hossen",
+  // },
+  // {
+  //   id: 4,
+  //   name: "Zakir Hossen",
+  //   position: "Manager",
+  //   image: "/placeholder.svg?height=400&width=300&text=Professional+Man+in+Suit",
+  //   facebook: "https://facebook.com/zavian.zeus",
+  //   twitter: "https://twitter.com/zavian_zeus",
+  //   instagram: "https://instagram.com/zavian.zeus",
+  // },
 ]
 
 export default function ContactRepresentatives() {
