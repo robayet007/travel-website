@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react'
 
 const images = [
   // '/travel-website/slide-1.jpg', // mountain
-  '/slide-2.jpg', // forest
-  '/slide-3.jpg', // ocean
+  '/slide-1.jpg', // forest
+  '/slide-2.png', // forest
+  '/slide-3.jpg', // forest
+  '/slide-4.jpg', // ocean
   // '/travel-website/slide-2.jpg', // sunset
 ]
 

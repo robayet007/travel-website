@@ -17,9 +17,9 @@ const teamMembers = [
     name: "Zobayer Ahmmad",
     position: "Director",
     image: "/p1.png",
-    facebook: "https://facebook.com/zobayer.ahmmad",
-    twitter: "https://twitter.com/zobayer_ahmmad",
-    instagram: "https://instagram.com/zobayer.ahmmad",
+    facebook: "https://www.facebook.com/ZobayerAhmmadZetu0?rdid=YSRgKLOxaosyiT78&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1EwQcxJzLY%2F#",
+    twitter: "https://x.com/ZobayerAhmmad?t=lBOGfwDn0xagJSBusWgj5w&s=09",
+    instagram: "https://www.instagram.com/zobayer.ahmmad?igsh=MTN2bHZwaTRtcjdkbg%3D%3D",
   },
   // {
   //   id: 3,
