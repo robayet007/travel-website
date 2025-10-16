@@ -24,7 +24,7 @@ export default function Slider() {
   useEffect(() => {
     const interval = setInterval(() => {
       nextSlide()
-    }, 3000) // change slide every 3 seconds
+    }, 6000) // change slide every 3 seconds
 
     return () => clearInterval(interval) // cleanup on unmount
   }, [current]) // runs again whenever 'current' changes
