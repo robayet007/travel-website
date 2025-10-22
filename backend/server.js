@@ -7,6 +7,9 @@ import dotenv from 'dotenv';
 dotenv.config();
 const app = express();
 
+// ✅ PORT ADD করুন
+const PORT = process.env.PORT || 5000;
+
 // CORS
 app.use(cors({
   origin: "*",
@@ -265,5 +268,13 @@ app.get('/', (req, res) => {
     }
   });
 });
+
+// ✅ PORT LISTENER ADD করুন (Vercel-এ ignore হবে)
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📍 Local: http://localhost:${PORT}`);
+  });
+}
 
 export default app;
