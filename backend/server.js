@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import fs from 'fs';
+import { v2 as cloudinary } from 'cloudinary';
 
 // ES Module এ __dirname fix
 const __filename = fileURLToPath(import.meta.url);
@@ -17,11 +17,13 @@ const app = express();
 
 const PORT = process.env.PORT || 5000;
 
-// ✅ Uploads folder তৈরি করুন
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
+// ✅ Cloudinary Configuration
+cloudinary.config({
+  cloud_name: 'dlfm2aqhc',
+  api_key: '759567457719666',
+  api_secret: 'doUZk7ZTa3w5SJehy0dwdAPssEM',
+  secure: true
+});
 
 // CORS
 app.use(cors({
@@ -34,20 +36,8 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Static files serve করার জন্য
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// ✅ MULTER CONFIGURATION
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
+// ✅ MULTER CONFIGURATION (Memory Storage)
+const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
@@ -104,10 +94,43 @@ const productSchema = new mongoose.Schema({
   price: { type: Number, required: true, min: 0 },
   offerPrice: { type: Number, required: true, min: 0 },
   features: [{ type: String, trim: true }],
-  image: { type: String, default: '' }
+  image: { type: String, default: '' },
+  cloudinaryId: { type: String, default: '' } // ✅ Cloudinary ID store করবো
 }, { timestamps: true });
 
 const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
+
+// ✅ Cloudinary Upload Helper Function
+const uploadToCloudinary = (fileBuffer) => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'travel-products',
+        resource_type: 'auto'
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      }
+    );
+    
+    uploadStream.end(fileBuffer);
+  });
+};
+
+// ✅ Cloudinary Delete Helper Function
+const deleteFromCloudinary = async (publicId) => {
+  try {
+    const result = await cloudinary.uploader.destroy(publicId);
+    return result;
+  } catch (error) {
+    console.error('Error deleting from Cloudinary:', error);
+    throw error;
+  }
+};
 
 // 📊 API Routes
 
@@ -143,7 +166,7 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
-// ✅ CREATE PRODUCT WITH IMAGE UPLOAD
+// ✅ CREATE PRODUCT WITH CLOUDINARY UPLOAD
 app.post('/api/products', upload.single('image'), async (req, res) => {
   try {
     await connectDB();
@@ -157,7 +180,7 @@ app.post('/api/products', upload.single('image'), async (req, res) => {
       });
     }
 
-    // ✅ Parse features (যদি JSON string হয়)
+    // ✅ Parse features
     let parsedFeatures = [];
     if (features) {
       try {
@@ -167,13 +190,34 @@ app.post('/api/products', upload.single('image'), async (req, res) => {
       }
     }
 
+    let imageUrl = '';
+    let cloudinaryId = '';
+
+    // ✅ যদি image upload করা হয়
+    if (req.file) {
+      try {
+        const result = await uploadToCloudinary(req.file.buffer);
+        imageUrl = result.secure_url;
+        cloudinaryId = result.public_id;
+        console.log('✅ Image uploaded to Cloudinary:', imageUrl);
+      } catch (uploadError) {
+        console.error('❌ Cloudinary upload failed:', uploadError);
+        return res.status(500).json({
+          success: false,
+          message: 'Image upload failed',
+          error: uploadError.message
+        });
+      }
+    }
+
     const newProduct = new Product({
       title: title.trim(),
       category: category.trim(),
       price: Number(price),
       offerPrice: Number(offerPrice),
       features: parsedFeatures,
-      image: req.file ? `/uploads/${req.file.filename}` : ''
+      image: imageUrl,
+      cloudinaryId: cloudinaryId
     });
 
     const savedProduct = await newProduct.save();
@@ -194,7 +238,7 @@ app.post('/api/products', upload.single('image'), async (req, res) => {
   }
 });
 
-// ✅ UPDATE PRODUCT WITH IMAGE UPLOAD
+// ✅ UPDATE PRODUCT WITH CLOUDINARY
 app.put('/api/products/:id', upload.single('image'), async (req, res) => {
   try {
     await connectDB();
@@ -230,16 +274,29 @@ app.put('/api/products/:id', upload.single('image'), async (req, res) => {
       features: parsedFeatures
     };
 
-    // যদি নতুন image upload হয়
+    // ✅ যদি নতুন image upload হয়
     if (req.file) {
-      // পুরনো image delete করুন
-      if (existingProduct.image) {
-        const oldImagePath = path.join(__dirname, existingProduct.image);
-        if (fs.existsSync(oldImagePath)) {
-          fs.unlinkSync(oldImagePath);
+      try {
+        // পুরনো image Cloudinary থেকে delete করুন
+        if (existingProduct.cloudinaryId) {
+          await deleteFromCloudinary(existingProduct.cloudinaryId);
+          console.log('✅ Old image deleted from Cloudinary');
         }
+
+        // নতুন image upload করুন
+        const result = await uploadToCloudinary(req.file.buffer);
+        updateData.image = result.secure_url;
+        updateData.cloudinaryId = result.public_id;
+        console.log('✅ New image uploaded to Cloudinary');
+        
+      } catch (uploadError) {
+        console.error('❌ Cloudinary upload failed:', uploadError);
+        return res.status(500).json({
+          success: false,
+          message: 'Image update failed',
+          error: uploadError.message
+        });
       }
-      updateData.image = `/uploads/${req.file.filename}`;
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -264,7 +321,7 @@ app.put('/api/products/:id', upload.single('image'), async (req, res) => {
   }
 });
 
-// Delete product
+// ✅ DELETE PRODUCT WITH CLOUDINARY
 app.delete('/api/products/:id', async (req, res) => {
   try {
     await connectDB();
@@ -279,11 +336,14 @@ app.delete('/api/products/:id', async (req, res) => {
       });
     }
 
-    // Delete image file
-    if (product.image) {
-      const imagePath = path.join(__dirname, product.image);
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
+    // ✅ Cloudinary থেকে image delete করুন
+    if (product.cloudinaryId) {
+      try {
+        await deleteFromCloudinary(product.cloudinaryId);
+        console.log('✅ Image deleted from Cloudinary');
+      } catch (deleteError) {
+        console.error('❌ Cloudinary delete failed:', deleteError);
+        // Continue with product deletion even if image delete fails
       }
     }
 
@@ -300,6 +360,25 @@ app.delete('/api/products/:id', async (req, res) => {
     res.status(400).json({
       success: false,
       message: 'Failed to delete product',
+      error: error.message
+    });
+  }
+});
+
+// Test Cloudinary Connection
+app.get('/test-cloudinary', async (req, res) => {
+  try {
+    // Simple test to check Cloudinary connection
+    const result = await cloudinary.api.ping();
+    res.json({
+      success: true,
+      message: '✅ Cloudinary connected successfully!',
+      cloudinary: result
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: '❌ Cloudinary connection failed',
       error: error.message
     });
   }
@@ -337,13 +416,14 @@ app.get('/mongodb-status', async (req, res) => {
 app.get('/', (req, res) => {
   res.json({ 
     success: true,
-    message: '🛍️ Travel Admin API is running!',
+    message: '🛍️ Travel Admin API with Cloudinary is running!',
     endpoints: {
       test: 'GET /test',
       mongodbStatus: 'GET /mongodb-status',
+      cloudinaryTest: 'GET /test-cloudinary',
       getAllProducts: 'GET /api/products',
-      createProduct: 'POST /api/products (with image upload)',
-      updateProduct: 'PUT /api/products/:id (with image upload)',
+      createProduct: 'POST /api/products (with Cloudinary upload)',
+      updateProduct: 'PUT /api/products/:id (with Cloudinary upload)',
       deleteProduct: 'DELETE /api/products/:id'
     }
   });
@@ -354,6 +434,7 @@ if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📍 Local: http://localhost:${PORT}`);
+    console.log(`☁️  Cloudinary configured for: dlfm2aqhc`);
   });
 }
 
