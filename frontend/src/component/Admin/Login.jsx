@@ -8,11 +8,11 @@ const AdminLogin = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (username === 'admin' && password === '12345') {
+    if (username === 'admin' && password === 'QWER@#12') {
       localStorage.setItem('isLoggedIn', 'true');
       navigate('/admin');
     } else {
-      alert('Invalid credentials! Username: jobayet, Password: QWER@#12');
+      alert('Invalid credentials!');
     }
   };
 
