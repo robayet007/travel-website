@@ -11,7 +11,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Test route
+// Test route - FIRST
 app.get('/test', (req, res) => {
   console.log('✅ Test route hit');
   res.json({ 
@@ -21,49 +21,75 @@ app.get('/test', (req, res) => {
   });
 });
 
-// MongoDB Connection
+// Test database connection - SECOND
+app.get('/db-test', async (req, res) => {
+  try {
+    console.log('🔗 Testing MongoDB connection...');
+    
+    // Check if mongoose is connected
+    const isConnected = mongoose.connection.readyState === 1;
+    
+    if (isConnected) {
+      res.json({ 
+        success: true,
+        message: '✅ MongoDB is connected!',
+        connectionState: mongoose.connection.readyState
+      });
+    } else {
+      res.json({ 
+        success: false,
+        message: '❌ MongoDB is not connected',
+        connectionState: mongoose.connection.readyState
+      });
+    }
+  } catch (error) {
+    console.error('❌ DB Test Error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Database test failed'
+    });
+  }
+});
+
+// MongoDB Connection with better options
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://mohammadrobayet009_db_user:vkWbkhEYvOaGuv9i@cluster0.a9bbtmw.mongodb.net/admin_dashboard?retryWrites=true&w=majority&appName=Cluster0";
 
-console.log('🔗 Connecting to MongoDB...');
+console.log('🔗 Attempting MongoDB connection...');
 
-mongoose.connect(MONGODB_URI)
-  .then(() => {
-    console.log('✅ MongoDB Connected Successfully');
-  })
-  .catch((err) => {
-    console.error('❌ MongoDB Connection Error:', err.message);
-  });
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+})
+.then(() => {
+  console.log('✅ MongoDB Connected Successfully');
+})
+.catch((err) => {
+  console.error('❌ MongoDB Connection Failed:', err.message);
+});
 
-// Product Schema
+// MongoDB connection events
+mongoose.connection.on('connected', () => {
+  console.log('✅ Mongoose connected to MongoDB');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('❌ Mongoose connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('⚠️ Mongoose disconnected');
+});
+
+// Simple Product Schema
 const productSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  category: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  price: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  offerPrice: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  features: [{
-    type: String,
-    trim: true
-  }],
-  image: {
-    type: String,
-    default: ''
-  }
+  title: String,
+  category: String,
+  price: Number,
+  offerPrice: Number,
+  features: [String],
+  image: String
 }, {
   timestamps: true
 });
@@ -72,21 +98,33 @@ const Product = mongoose.model('Product', productSchema);
 
 // 📊 API Routes
 
-// Get all products
+// Get all products - WITH BETTER ERROR HANDLING
 app.get('/api/products', async (req, res) => {
   try {
     console.log('📦 Fetching products...');
+    
+    // Check database connection first
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(500).json({ 
+        success: false,
+        message: 'Database not connected',
+        connectionState: mongoose.connection.readyState
+      });
+    }
+    
     const products = await Product.find().sort({ createdAt: -1 });
+    
+    console.log(`✅ Found ${products.length} products`);
     res.json({
       success: true,
       count: products.length,
       data: products
     });
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('❌ Error fetching products:', error.message);
     res.status(500).json({ 
       success: false,
-      message: 'Server error'
+      message: 'Failed to fetch products: ' + error.message
     });
   }
 });
@@ -95,6 +133,14 @@ app.get('/api/products', async (req, res) => {
 app.post('/api/products', async (req, res) => {
   try {
     console.log('📦 Creating product...', req.body);
+    
+    // Check database connection first
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(500).json({ 
+        success: false,
+        message: 'Database not connected'
+      });
+    }
     
     const { title, category, price, offerPrice, features } = req.body;
 
@@ -117,38 +163,17 @@ app.post('/api/products', async (req, res) => {
 
     const savedProduct = await newProduct.save();
     
+    console.log('✅ Product created:', savedProduct._id);
     res.status(201).json({
       success: true,
       message: 'Product created successfully',
       data: savedProduct
     });
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('❌ Error creating product:', error.message);
     res.status(400).json({ 
       success: false,
       message: error.message 
-    });
-  }
-});
-
-// Get single product
-app.get('/api/products/:id', async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({ 
-        success: false,
-        message: 'Product not found' 
-      });
-    }
-    res.json({
-      success: true,
-      data: product
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      success: false,
-      message: 'Server error'
     });
   }
 });
@@ -160,9 +185,14 @@ app.get('/', (req, res) => {
     message: '🛍️ Travel Admin API is running!',
     endpoints: {
       test: 'GET /test',
+      dbTest: 'GET /db-test',
       getAllProducts: 'GET /api/products',
       createProduct: 'POST /api/products',
       getProduct: 'GET /api/products/:id'
+    },
+    database: {
+      connectionState: mongoose.connection.readyState,
+      states: ['disconnected', 'connected', 'connecting', 'disconnecting']
     }
   });
 });
