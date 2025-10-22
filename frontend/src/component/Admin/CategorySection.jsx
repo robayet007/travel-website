@@ -12,19 +12,24 @@ const CategorySection = ({ category }) => {
     features: [''],
     image: null
   });
+  const [imagePreview, setImagePreview] = useState(null);
 
   const API_BASE = 'https://travel-website-khaki-three.vercel.app';
 
   // Fetch packages by category
   const fetchPackages = async () => {
     try {
+      console.log('🔄 Fetching packages for category:', category.value);
       const response = await axios.get(`${API_BASE}/api/products`);
+      console.log('📦 Full API Response:', response.data);
+      
       const filteredPackages = response.data.data.filter(
         pkg => pkg.category === category.value
       );
+      console.log('🎯 Filtered Packages:', filteredPackages);
       setPackages(filteredPackages);
     } catch (error) {
-      console.error('Error fetching packages:', error);
+      console.error('❌ Error fetching packages:', error);
       setPackages([]);
     }
   };
@@ -40,7 +45,13 @@ const CategorySection = ({ category }) => {
       features: [''],
       image: null 
     });
+    setImagePreview(null);
   }, [category.value]);
+
+  // Debug packages when they change
+  useEffect(() => {
+    console.log('📦 Packages updated:', packages);
+  }, [packages]);
 
   const addFeatureField = () => {
     setFormData({
@@ -64,18 +75,55 @@ const CategorySection = ({ category }) => {
     setFormData({ ...formData, features: newFeatures });
   };
 
-  // ✅ Image file handle করুন
+  // ✅ Improved Image file handling
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      setFormData({ ...formData, image: e.target.files[0] });
+      const file = e.target.files[0];
+      console.log('📸 Selected file:', file.name, file.size, file.type);
+      
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('❌ Please select a valid image file (JPEG, PNG, GIF, WebP)');
+        e.target.value = '';
+        return;
+      }
+
+      // Validate file size (10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('❌ Image size should be less than 10MB');
+        e.target.value = '';
+        return;
+      }
+
+      setFormData({ ...formData, image: file });
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setFormData({ ...formData, image: null });
+      setImagePreview(null);
     }
   };
 
-  // ✅ Form submit with image upload
+  // ✅ Improved Form submit with image upload
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    console.log('🚀 Submitting form data:', {
+      title: formData.title,
+      category: category.value,
+      price: formData.price,
+      offerPrice: formData.offerPrice,
+      features: formData.features,
+      hasImage: !!formData.image
+    });
+
     try {
-      // FormData দিয়ে image সহ data পাঠান
       const formDataToSend = new FormData();
       formDataToSend.append('title', formData.title);
       formDataToSend.append('category', category.value);
@@ -88,20 +136,30 @@ const CategorySection = ({ category }) => {
       // Image file add করুন
       if (formData.image) {
         formDataToSend.append('image', formData.image);
+        console.log('📤 Uploading image:', formData.image.name);
       }
 
+      const config = {
+        headers: { 
+          'Content-Type': 'multipart/form-data',
+        },
+        timeout: 30000 // 30 seconds timeout
+      };
+
+      let response;
       if (editingPackage) {
-        await axios.put(`${API_BASE}/api/products/${editingPackage._id}`, formDataToSend, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        console.log('✏️ Updating package:', editingPackage._id);
+        response = await axios.put(`${API_BASE}/api/products/${editingPackage._id}`, formDataToSend, config);
         alert('✅ Package updated successfully!');
       } else {
-        await axios.post(`${API_BASE}/api/products`, formDataToSend, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        console.log('➕ Creating new package');
+        response = await axios.post(`${API_BASE}/api/products`, formDataToSend, config);
         alert('✅ Package added successfully!');
       }
 
+      console.log('✅ Server Response:', response.data);
+
+      // Reset form
       setShowForm(false);
       setEditingPackage(null);
       setFormData({ 
@@ -111,22 +169,45 @@ const CategorySection = ({ category }) => {
         features: [''],
         image: null 
       });
-      fetchPackages();
+      setImagePreview(null);
+      
+      // Reset file input
+      const fileInput = document.querySelector('input[type="file"]');
+      if (fileInput) fileInput.value = '';
+      
+      // Refresh packages
+      setTimeout(() => {
+        fetchPackages();
+      }, 1000);
+      
     } catch (error) {
-      console.error('Error saving package:', error);
-      alert(`❌ Error: ${error.response?.data?.message || error.message}`);
+      console.error('❌ Error saving package:', error);
+      
+      if (error.code === 'ERR_NETWORK') {
+        alert('❌ Network error! Please check your connection.');
+      } else if (error.response?.status === 413) {
+        alert('❌ File too large! Please select a smaller image (max 10MB).');
+      } else if (error.response?.status === 400) {
+        alert(`❌ Validation Error: ${error.response.data.message}`);
+      } else if (error.response?.status === 500) {
+        alert(`❌ Server Error: ${error.response.data.message}`);
+      } else {
+        alert(`❌ Error: ${error.response?.data?.message || error.message}`);
+      }
     }
   };
 
   const handleEdit = (pkg) => {
+    console.log('✏️ Editing package:', pkg);
     setEditingPackage(pkg);
     setFormData({
       title: pkg.title,
       price: pkg.price,
       offerPrice: pkg.offerPrice,
       features: pkg.features.length > 0 ? pkg.features : [''],
-      image: null // Edit-এ নতুন image upload করা যাবে
+      image: null
     });
+    setImagePreview(null);
     setShowForm(true);
   };
 
@@ -140,14 +221,20 @@ const CategorySection = ({ category }) => {
       features: [''],
       image: null 
     });
+    setImagePreview(null);
+    
+    // Reset file input
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) fileInput.value = '';
   };
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this package?')) {
       try {
+        console.log('🗑️ Deleting package:', id);
         await axios.delete(`${API_BASE}/api/products/${id}`);
-        fetchPackages();
         alert('✅ Package deleted successfully!');
+        fetchPackages();
       } catch (error) {
         console.error('Error deleting package:', error);
         alert('❌ Error deleting package!');
@@ -155,9 +242,13 @@ const CategorySection = ({ category }) => {
     }
   };
 
-  // ✅ Image display function - Cloudinary URL সরাসরি ব্যবহার করুন
+  // ✅ Improved Image display function
   const getImageUrl = (imagePath) => {
-    if (!imagePath) return 'https://via.placeholder.com/300x200?text=No+Image';
+    console.log('🖼️ Getting image URL for:', imagePath);
+    
+    if (!imagePath || imagePath === '' || imagePath === null) {
+      return 'https://via.placeholder.com/300x200/4F46E5/FFFFFF?text=No+Image';
+    }
     
     // যদি imagePath ইতিমধ্যে full Cloudinary URL হয়
     if (imagePath.startsWith('http')) {
@@ -165,7 +256,20 @@ const CategorySection = ({ category }) => {
     }
     
     // যদি relative path হয় (পুরনো system এর জন্য backup)
-    return `${API_BASE}${imagePath}`;
+    if (imagePath.startsWith('/uploads')) {
+      return `${API_BASE}${imagePath}`;
+    }
+    
+    // Default fallback
+    return 'https://via.placeholder.com/300x200/EF4444/FFFFFF?text=Invalid+Image';
+  };
+
+  // ✅ Better image error handling
+  const handleImageError = (e) => {
+    console.error('🖼️ Image failed to load:', e.target.src);
+    e.target.src = 'https://via.placeholder.com/300x200/EF4444/FFFFFF?text=Image+Error';
+    e.target.alt = 'Image not available';
+    e.target.className = 'object-contain w-full h-full bg-gray-100';
   };
 
   return (
@@ -206,7 +310,7 @@ const CategorySection = ({ category }) => {
               </div>
             </div>
             
-            {/* ✅ Image Upload Field */}
+            {/* ✅ Improved Image Upload Field */}
             <div>
               <label className="block mb-2 text-sm font-bold text-gray-700">Package Image</label>
               <input
@@ -215,19 +319,37 @@ const CategorySection = ({ category }) => {
                 onChange={handleImageChange}
                 className="w-full px-3 py-2 text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              {formData.image && (
-                <p className="mt-1 text-sm text-green-600">
-                  ✅ Selected: {formData.image.name}
-                </p>
+              <p className="mt-1 text-xs text-gray-500">
+                Supported formats: JPEG, PNG, GIF, WebP (Max: 10MB)
+              </p>
+              
+              {/* ✅ Selected File Preview */}
+              {imagePreview && (
+                <div className="mt-2">
+                  <p className="mb-1 text-sm text-green-600">
+                    ✅ New Image Preview:
+                  </p>
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="object-cover w-20 h-20 border rounded"
+                  />
+                </div>
               )}
-              {editingPackage && editingPackage.image && !formData.image && (
+              
+              {/* ✅ Current Image Preview in Edit Mode */}
+              {editingPackage && editingPackage.image && !imagePreview && (
                 <div className="mt-2">
                   <p className="mb-1 text-sm text-gray-500">Current Image:</p>
                   <img 
                     src={getImageUrl(editingPackage.image)} 
                     alt="Current" 
                     className="object-cover w-20 h-20 border rounded"
+                    onError={handleImageError}
                   />
+                  <p className="mt-1 text-xs text-gray-400">
+                    Leave empty to keep current image
+                  </p>
                 </div>
               )}
             </div>
@@ -242,6 +364,7 @@ const CategorySection = ({ category }) => {
                   onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                   className="w-full px-3 py-2 text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
+                  min="0"
                 />
               </div>
               <div>
@@ -253,6 +376,7 @@ const CategorySection = ({ category }) => {
                   onChange={(e) => setFormData({ ...formData, offerPrice: e.target.value })}
                   className="w-full px-3 py-2 text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
+                  min="0"
                 />
               </div>
             </div>
@@ -312,15 +436,14 @@ const CategorySection = ({ category }) => {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {packages.map((pkg) => (
               <div key={pkg._id} className="overflow-hidden transition duration-200 bg-white border rounded-lg shadow-md hover:shadow-lg">
-                {/* ✅ Cloudinary Image Display */}
-                <div className="h-48 overflow-hidden bg-gray-200">
+                {/* ✅ Improved Cloudinary Image Display */}
+                <div className="h-48 overflow-hidden bg-gray-100">
                   <img 
                     src={getImageUrl(pkg.image)}
                     alt={pkg.title}
-                    className="object-cover w-full h-full"
-                    onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/300x200?text=No+Image';
-                    }}
+                    className="object-cover w-full h-full transition duration-300 hover:scale-105"
+                    onError={handleImageError}
+                    loading="lazy"
                   />
                 </div>
 
