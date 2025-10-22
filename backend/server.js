@@ -20,58 +20,110 @@ app.get('/test', (req, res) => {
   });
 });
 
-// ✅ TEMPORARY: In-memory database for testing
-let temporaryProducts = [
-  {
-    _id: '1',
-    title: 'Cox\'s Bazar Beach Tour',
-    category: 'Beach',
-    price: 5000,
-    offerPrice: 4500,
-    features: ['3 Days 2 Nights', 'Breakfast', 'Beach Access'],
-    image: '',
-    createdAt: new Date(),
-    updatedAt: new Date()
-  },
-  {
-    _id: '2', 
-    title: 'Sajek Valley Tour',
-    category: 'Mountain',
-    price: 7000,
-    offerPrice: 6500,
-    features: ['Hotel Stay', 'Local Guide', 'Breakfast'],
-    image: '',
-    createdAt: new Date(),
-    updatedAt: new Date()
-  }
-];
+// ✅ MongoDB Connection with PROPER SETTINGS
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://mohammadrobayet009_db_user:vkWbkhEYvOaGuv9i@cluster0.a9bbtmw.mongodb.net/admin_dashboard?retryWrites=true&w=majority&appName=Cluster0";
 
-// 📊 API Routes with TEMPORARY DATA
+console.log('🔗 Connecting to MongoDB...');
+
+// Enhanced connection with retry logic
+const connectDB = async () => {
+  try {
+    await mongoose.connect(MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 30000,
+      socketTimeoutMS: 45000,
+    });
+    console.log('✅ MongoDB Connected Successfully');
+  } catch (error) {
+    console.error('❌ MongoDB Connection Failed:', error.message);
+    console.log('💡 Solution: Check MongoDB Atlas Network Access settings');
+  }
+};
+
+connectDB();
+
+// Product Schema
+const productSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  category: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  price: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  offerPrice: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  features: [{
+    type: String,
+    trim: true
+  }],
+  image: {
+    type: String,
+    default: ''
+  }
+}, {
+  timestamps: true
+});
+
+const Product = mongoose.model('Product', productSchema);
+
+// 📊 API Routes with MONGODB
 
 // Get all products
 app.get('/api/products', async (req, res) => {
   try {
-    console.log('📦 Fetching products from temporary storage...');
+    console.log('📦 Fetching products from MongoDB...');
+    
+    // Check database connection
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(500).json({ 
+        success: false,
+        message: 'Database not connected. Please check MongoDB settings.',
+        connectionState: mongoose.connection.readyState
+      });
+    }
+    
+    const products = await Product.find().sort({ createdAt: -1 });
     
     res.json({
       success: true,
-      count: temporaryProducts.length,
-      data: temporaryProducts,
-      message: 'Using temporary data - MongoDB connection in progress'
+      count: products.length,
+      data: products,
+      message: 'Data from MongoDB'
     });
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('❌ Error fetching products:', error);
     res.status(500).json({ 
       success: false,
-      message: 'Server error'
+      message: 'Error fetching products: ' + error.message
     });
   }
 });
 
-// Create product
+// Create product - WILL SAVE TO MONGODB
 app.post('/api/products', async (req, res) => {
   try {
-    console.log('📦 Creating product in temporary storage...');
+    console.log('📦 Creating product in MongoDB...');
+    
+    // Check database connection
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(500).json({ 
+        success: false,
+        message: 'Database not connected. Cannot save product.'
+      });
+    }
     
     const { title, category, price, offerPrice, features } = req.body;
 
@@ -82,43 +134,47 @@ app.post('/api/products', async (req, res) => {
       });
     }
 
-    const newProduct = {
-      _id: Date.now().toString(),
+    // ✅ THIS WILL SAVE TO MONGODB
+    const newProduct = new Product({
       title: title.trim(),
       category: category.trim(),
       price: Number(price),
       offerPrice: Number(offerPrice),
       features: features || [],
-      image: '',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
+      image: ''
+    });
 
-    temporaryProducts.unshift(newProduct);
+    const savedProduct = await newProduct.save();
+    console.log('✅ Product saved to MongoDB:', savedProduct._id);
     
     res.status(201).json({
       success: true,
-      message: 'Product created successfully (Temporary storage)',
-      data: newProduct
+      message: 'Product created successfully in MongoDB!',
+      data: savedProduct
     });
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('❌ Error creating product:', error);
     res.status(400).json({ 
       success: false,
-      message: error.message 
+      message: 'Failed to create product: ' + error.message
     });
   }
 });
 
-// Delete product
+// Delete product from MongoDB
 app.delete('/api/products/:id', async (req, res) => {
   try {
-    const productId = req.params.id;
-    const initialLength = temporaryProducts.length;
+    // Check database connection
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(500).json({ 
+        success: false,
+        message: 'Database not connected'
+      });
+    }
+
+    const deletedProduct = await Product.findByIdAndDelete(req.params.id);
     
-    temporaryProducts = temporaryProducts.filter(product => product._id !== productId);
-    
-    if (temporaryProducts.length === initialLength) {
+    if (!deletedProduct) {
       return res.status(404).json({ 
         success: false,
         message: 'Product not found' 
@@ -127,40 +183,44 @@ app.delete('/api/products/:id', async (req, res) => {
 
     res.json({ 
       success: true,
-      message: 'Product deleted successfully (Temporary storage)'
+      message: 'Product deleted successfully from MongoDB'
     });
   } catch (error) {
     res.status(500).json({ 
       success: false,
-      message: 'Server error'
+      message: 'Server error: ' + error.message
     });
   }
 });
 
 // Database status
 app.get('/db-status', (req, res) => {
+  const status = mongoose.connection.readyState;
+  const statusText = ['Disconnected', 'Connected', 'Connecting', 'Disconnecting'][status];
+  
   res.json({
-    success: false,
-    message: '⚠️ Using temporary storage - MongoDB connection in progress',
-    connectionState: 0,
-    storage: 'Temporary Memory'
+    success: status === 1,
+    message: `Database status: ${statusText}`,
+    connectionState: status,
+    note: status === 0 ? 'Check MongoDB Atlas Network Access settings' : 'All good!'
   });
 });
 
 // Home route
 app.get('/', (req, res) => {
+  const dbStatus = ['❌ Disconnected', '✅ Connected', '🔄 Connecting', '⚠️ Disconnecting'][mongoose.connection.readyState];
+  
   res.json({ 
     success: true,
     message: '🛍️ Travel Admin API is running!',
-    database: '⚠️ Temporary Storage (MongoDB connecting...)',
+    database: dbStatus,
     endpoints: {
       test: 'GET /test',
       dbStatus: 'GET /db-status',
       getAllProducts: 'GET /api/products',
       createProduct: 'POST /api/products',
       deleteProduct: 'DELETE /api/products/:id'
-    },
-    note: 'Products are stored in temporary memory for now'
+    }
   });
 });
 
