@@ -155,6 +155,19 @@ const CategorySection = ({ category }) => {
     }
   };
 
+  // ✅ Image display function - Cloudinary URL সরাসরি ব্যবহার করুন
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return 'https://via.placeholder.com/300x200?text=No+Image';
+    
+    // যদি imagePath ইতিমধ্যে full Cloudinary URL হয়
+    if (imagePath.startsWith('http')) {
+      return imagePath;
+    }
+    
+    // যদি relative path হয় (পুরনো system এর জন্য backup)
+    return `${API_BASE}${imagePath}`;
+  };
+
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
       <div className="flex items-center justify-between mb-6">
@@ -208,9 +221,14 @@ const CategorySection = ({ category }) => {
                 </p>
               )}
               {editingPackage && editingPackage.image && !formData.image && (
-                <p className="mt-1 text-sm text-gray-500">
-                  Current image will be kept if no new image is selected
-                </p>
+                <div className="mt-2">
+                  <p className="mb-1 text-sm text-gray-500">Current Image:</p>
+                  <img 
+                    src={getImageUrl(editingPackage.image)} 
+                    alt="Current" 
+                    className="object-cover w-20 h-20 border rounded"
+                  />
+                </div>
               )}
             </div>
             
@@ -294,22 +312,16 @@ const CategorySection = ({ category }) => {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {packages.map((pkg) => (
               <div key={pkg._id} className="overflow-hidden transition duration-200 bg-white border rounded-lg shadow-md hover:shadow-lg">
-                {/* ✅ Image থেকে সঠিক path */}
+                {/* ✅ Cloudinary Image Display */}
                 <div className="h-48 overflow-hidden bg-gray-200">
-                  {pkg.image ? (
-                    <img 
-                      src={`${API_BASE}${pkg.image}`}
-                      alt={pkg.title}
-                      className="object-cover w-full h-full"
-                      onError={(e) => {
-                        e.target.src = 'https://via.placeholder.com/300x200?text=No+Image';
-                      }}
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center w-full h-full bg-gray-300">
-                      <span className="text-gray-500">No Image</span>
-                    </div>
-                  )}
+                  <img 
+                    src={getImageUrl(pkg.image)}
+                    alt={pkg.title}
+                    className="object-cover w-full h-full"
+                    onError={(e) => {
+                      e.target.src = 'https://via.placeholder.com/300x200?text=No+Image';
+                    }}
+                  />
                 </div>
 
                 <div className="p-4">
