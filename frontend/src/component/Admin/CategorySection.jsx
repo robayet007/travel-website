@@ -13,10 +13,14 @@ const CategorySection = ({ category }) => {
     image: null
   });
 
+  // ✅ API Base URL - Vercel backend
+  const API_BASE = 'https://travel-website-khaki-three.vercel.app';
+
   // Fetch packages by category
   const fetchPackages = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/products/category/${category.value}`);
+      // ✅ URL Change - Vercel backend থেকে data fetch
+      const response = await axios.get(`${API_BASE}/api/products/category/${category.value}`);
       setPackages(response.data.data);
     } catch (error) {
       console.error('Error fetching packages:', error);
@@ -88,15 +92,16 @@ const CategorySection = ({ category }) => {
         formDataToSend.append('image', formData.image);
       }
 
+      // ✅ URL Change - Vercel backend-এ data save
       if (editingPackage) {
-        await axios.put(`http://localhost:5000/api/products/${editingPackage._id}`, formDataToSend, {
+        await axios.put(`${API_BASE}/api/products/${editingPackage._id}`, formDataToSend, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
         });
         alert('Package updated successfully!');
       } else {
-        await axios.post('http://localhost:5000/api/products', formDataToSend, {
+        await axios.post(`${API_BASE}/api/products`, formDataToSend, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -150,7 +155,8 @@ const CategorySection = ({ category }) => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this package?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/products/${id}`);
+        // ✅ URL Change - Vercel backend থেকে delete
+        await axios.delete(`${API_BASE}/api/products/${id}`);
         fetchPackages();
         alert('Package deleted successfully!');
       } catch (error) {
@@ -300,7 +306,8 @@ const CategorySection = ({ category }) => {
                 <div className="h-48 overflow-hidden bg-gray-200">
                   {pkg.image ? (
                     <img 
-                      src={`http://localhost:5000${pkg.image}`} 
+                      // ✅ Image URL Change - Vercel backend থেকে image load
+                      src={`${API_BASE}${pkg.image}`} 
                       alt={pkg.title}
                       className="object-cover w-full h-full"
                       onError={(e) => {

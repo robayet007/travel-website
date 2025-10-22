@@ -10,7 +10,7 @@ const Umrah = () => {
 
   const fetchPackages = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/products/category/holy-umrah-hajj')
+      const response = await axios.get('https://travel-website-khaki-three.vercel.app/api/products/category/holy-umrah-hajj')
       setPackages(response.data.data)
     } catch (error) {
       console.error('Error fetching packages:', error)

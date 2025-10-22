@@ -7,18 +7,24 @@ export default function Hajj() {
   const [hajjPackages, setHajjPackages] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // ✅ API Base URL Change - Vercel backend
+  const API_BASE = 'https://travel-website-khaki-three.vercel.app';
+
   // Fetch packages from API
   useEffect(() => {
     const fetchPackages = async () => {
       try {
         setLoading(true);
         
+        // ✅ URL Change - Vercel backend থেকে data fetch
         // Fetch Umrah packages
-        const umrahResponse = await axios.get('http://localhost:5000/api/products/category/holy-umrah-hajj');
+        const umrahResponse = await axios.get(`${API_BASE}/api/products/category/holy-umrah-hajj`);
         setUmrahPackages(umrahResponse.data.data);
         
+        
+        // ✅ URL Change - Vercel backend থেকে data fetch  
         // Fetch Hajj packages  
-        const hajjResponse = await axios.get('http://localhost:5000/api/products/category/holy-hajj');
+        const hajjResponse = await axios.get(`${API_BASE}/api/products/category/holy-hajj`);
         setHajjPackages(hajjResponse.data.data);
         
       } catch (error) {
@@ -39,7 +45,8 @@ export default function Hajj() {
         <div className="overflow-hidden rounded-[20px] h-80 mb-4 -mx-6 -mt-6">
           {pkg.image ? (
             <img
-              src={`http://localhost:5000${pkg.image}`}
+              // ✅ Image URL Change - Vercel backend থেকে image load
+              src={`${API_BASE}${pkg.image}`}
               alt={pkg.title}
               className="object-cover object-center w-full h-full transition-transform duration-300 ease-out group-hover:scale-105"
               onError={(e) => {
