@@ -12,19 +12,11 @@
     "mongoose": "^8.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.x"
   }
 }
-```
-
-### 3️⃣ **MongoDB Atlas Network Access**
-
-MongoDB Atlas Dashboard-এ যান:
-1. **Network Access** → **Add IP Address**
-2. **"Allow Access from Anywhere"** select করুন
-3. IP: `0.0.0.0/0` add করুন
-
-### 4️⃣ **Vercel Environment Variables**
-
-Vercel Dashboard → Settings → Environment Variables:
-```
-MONGODB_URI=mongodb+srv://mohammadrobayet009_db_user:IlrLmx5F6iUVSLRY@cluster0.a9bbtmw.mongodb.net/admin_dashboard?retryWrites=true&w=majority&appName=Cluster0
