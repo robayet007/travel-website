@@ -13,17 +13,19 @@ const CategorySection = ({ category }) => {
     image: null
   });
 
-  // ✅ API Base URL - Vercel backend
   const API_BASE = 'https://travel-website-khaki-three.vercel.app';
 
   // Fetch packages by category
   const fetchPackages = async () => {
     try {
-      // ✅ URL Change - Vercel backend থেকে data fetch
-      const response = await axios.get(`${API_BASE}/api/products/category/${category.value}`);
-      setPackages(response.data.data);
+      const response = await axios.get(`${API_BASE}/api/products`);
+      const filteredPackages = response.data.data.filter(
+        pkg => pkg.category === category.value
+      );
+      setPackages(filteredPackages);
     } catch (error) {
       console.error('Error fetching packages:', error);
+      setPackages([]);
     }
   };
 
@@ -40,7 +42,6 @@ const CategorySection = ({ category }) => {
     });
   }, [category.value]);
 
-  // Add new feature field
   const addFeatureField = () => {
     setFormData({
       ...formData,
@@ -48,65 +49,57 @@ const CategorySection = ({ category }) => {
     });
   };
 
-  // Update feature value - automatically add checkmark
   const updateFeature = (index, value) => {
     const newFeatures = [...formData.features];
-    
-    // যদি value এর শুরুতে ✅ না থাকে, তাহলে add করবে
     if (value.trim() && !value.startsWith('✅')) {
       newFeatures[index] = '✅ ' + value;
     } else {
       newFeatures[index] = value;
     }
-    
     setFormData({ ...formData, features: newFeatures });
   };
 
-  // Remove feature
   const removeFeature = (index) => {
     const newFeatures = formData.features.filter((_, i) => i !== index);
     setFormData({ ...formData, features: newFeatures });
   };
 
-  // Handle image upload
+  // ✅ Image file handle করুন
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setFormData({ ...formData, image: e.target.files[0] });
     }
   };
 
-  // Handle form submit
+  // ✅ Form submit with image upload
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // FormData দিয়ে image সহ data পাঠান
       const formDataToSend = new FormData();
       formDataToSend.append('title', formData.title);
       formDataToSend.append('category', category.value);
       formDataToSend.append('price', formData.price);
       formDataToSend.append('offerPrice', formData.offerPrice);
       formDataToSend.append('features', JSON.stringify(
-        formData.features.filter(feature => feature && feature.trim() !== '')
+        formData.features.filter(f => f && f.trim() !== '')
       ));
-      
+
+      // Image file add করুন
       if (formData.image) {
         formDataToSend.append('image', formData.image);
       }
 
-      // ✅ URL Change - Vercel backend-এ data save
       if (editingPackage) {
         await axios.put(`${API_BASE}/api/products/${editingPackage._id}`, formDataToSend, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+          headers: { 'Content-Type': 'multipart/form-data' }
         });
-        alert('Package updated successfully!');
+        alert('✅ Package updated successfully!');
       } else {
         await axios.post(`${API_BASE}/api/products`, formDataToSend, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+          headers: { 'Content-Type': 'multipart/form-data' }
         });
-        alert('Package added successfully!');
+        alert('✅ Package added successfully!');
       }
 
       setShowForm(false);
@@ -121,11 +114,10 @@ const CategorySection = ({ category }) => {
       fetchPackages();
     } catch (error) {
       console.error('Error saving package:', error);
-      alert(`Error: ${error.response?.data?.message || error.message}`);
+      alert(`❌ Error: ${error.response?.data?.message || error.message}`);
     }
   };
 
-  // Edit package
   const handleEdit = (pkg) => {
     setEditingPackage(pkg);
     setFormData({
@@ -133,12 +125,11 @@ const CategorySection = ({ category }) => {
       price: pkg.price,
       offerPrice: pkg.offerPrice,
       features: pkg.features.length > 0 ? pkg.features : [''],
-      image: null
+      image: null // Edit-এ নতুন image upload করা যাবে
     });
     setShowForm(true);
   };
 
-  // Cancel edit
   const handleCancel = () => {
     setShowForm(false);
     setEditingPackage(null);
@@ -151,24 +142,21 @@ const CategorySection = ({ category }) => {
     });
   };
 
-  // Delete package
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this package?')) {
       try {
-        // ✅ URL Change - Vercel backend থেকে delete
         await axios.delete(`${API_BASE}/api/products/${id}`);
         fetchPackages();
-        alert('Package deleted successfully!');
+        alert('✅ Package deleted successfully!');
       } catch (error) {
         console.error('Error deleting package:', error);
-        alert('Error deleting package!');
+        alert('❌ Error deleting package!');
       }
     }
   };
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
-      {/* Clean Header - Only category name */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-800">{category.name}</h1>
         <button
@@ -205,7 +193,7 @@ const CategorySection = ({ category }) => {
               </div>
             </div>
             
-            {/* Image Upload Field */}
+            {/* ✅ Image Upload Field */}
             <div>
               <label className="block mb-2 text-sm font-bold text-gray-700">Package Image</label>
               <input
@@ -216,7 +204,12 @@ const CategorySection = ({ category }) => {
               />
               {formData.image && (
                 <p className="mt-1 text-sm text-green-600">
-                  Selected: {formData.image.name}
+                  ✅ Selected: {formData.image.name}
+                </p>
+              )}
+              {editingPackage && editingPackage.image && !formData.image && (
+                <p className="mt-1 text-sm text-gray-500">
+                  Current image will be kept if no new image is selected
                 </p>
               )}
             </div>
@@ -296,22 +289,19 @@ const CategorySection = ({ category }) => {
         </form>
       )}
 
-      {/* Packages List - Grid Layout */}
       <div>
         {packages.length > 0 ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {packages.map((pkg) => (
               <div key={pkg._id} className="overflow-hidden transition duration-200 bg-white border rounded-lg shadow-md hover:shadow-lg">
-                {/* Image Section */}
+                {/* ✅ Image থেকে সঠিক path */}
                 <div className="h-48 overflow-hidden bg-gray-200">
                   {pkg.image ? (
                     <img 
-                      // ✅ Image URL Change - Vercel backend থেকে image load
-                      src={`${API_BASE}${pkg.image}`} 
+                      src={`${API_BASE}${pkg.image}`}
                       alt={pkg.title}
                       className="object-cover w-full h-full"
                       onError={(e) => {
-                        console.log('Image failed to load:', pkg.image);
                         e.target.src = 'https://via.placeholder.com/300x200?text=No+Image';
                       }}
                     />
@@ -322,23 +312,19 @@ const CategorySection = ({ category }) => {
                   )}
                 </div>
 
-                {/* Content Section */}
                 <div className="p-4">
-                  {/* Title */}
                   <h4 className="mb-2 text-lg font-bold text-gray-800 line-clamp-2">{pkg.title}</h4>
                   
-                  {/* Prices - Taka (৳) mark */}
                   <div className="flex items-center gap-3 mb-3">
                     <span className="text-sm text-gray-500 line-through">৳{pkg.price}</span>
                     <span className="text-lg font-bold text-green-600">৳{pkg.offerPrice}</span>
                   </div>
 
-                  {/* Features */}
                   <div className="mb-4">
                     <ul className="space-y-1">
                       {pkg.features.slice(0, 3).map((feature, index) => (
-                        <li key={index} className="flex items-center text-sm text-gray-600">
-                          <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></span>
+                        <li key={index} className="flex items-start text-sm text-gray-600">
+                          <span className="mt-1.5 w-1.5 h-1.5 bg-blue-500 rounded-full mr-2 flex-shrink-0"></span>
                           <span className="line-clamp-1">{feature}</span>
                         </li>
                       ))}
@@ -350,7 +336,6 @@ const CategorySection = ({ category }) => {
                     </ul>
                   </div>
 
-                  {/* Action Buttons */}
                   <div className="flex gap-2 pt-3 border-t">
                     <button
                       onClick={() => handleEdit(pkg)}
