@@ -13,10 +13,9 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
-// Vercel-এর জন্য uploads directory পরিবর্তন
-const uploadsDir = path.join(process.cwd(), 'uploads');
+// ✅ Vercel-এর জন্য uploads directory /tmp ব্যবহার করুন
+const uploadsDir = path.join('/tmp', 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
@@ -51,12 +50,23 @@ const upload = multer({
   }
 });
 
-// MongoDB Connection - Environment variable ব্যবহার করুন
+// ✅ MongoDB Connection with better options
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://mohammadrobayet009_db_user:vkWbkhEYvOaGuv9i@cluster0.a9bbtmw.mongodb.net/admin_dashboard?retryWrites=true&w=majority&appName=Cluster0";
 
-mongoose.connect(MONGODB_URI)
-  .then(() => console.log('✅ MongoDB Connected Successfully'))
-  .catch(err => console.error('❌ MongoDB Connection Error:', err));
+// ✅ Connection function with error handling
+const connectDB = async () => {
+  try {
+    await mongoose.connect(MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('✅ MongoDB Connected Successfully');
+  } catch (err) {
+    console.error('❌ MongoDB Connection Error:', err.message);
+  }
+};
+
+connectDB();
 
 // Product Schema with image
 const productSchema = new mongoose.Schema({
@@ -106,9 +116,10 @@ app.get('/api/products', async (req, res) => {
       data: products
     });
   } catch (error) {
+    console.error('❌ Error fetching products:', error);
     res.status(500).json({ 
       success: false,
-      message: error.message 
+      message: 'Internal server error'
     });
   }
 });
@@ -116,6 +127,14 @@ app.get('/api/products', async (req, res) => {
 // Get single product
 app.get('/api/products/:id', async (req, res) => {
   try {
+    // ✅ MongoDB ID validation
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Invalid product ID' 
+      });
+    }
+
     const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ 
@@ -128,9 +147,10 @@ app.get('/api/products/:id', async (req, res) => {
       data: product
     });
   } catch (error) {
+    console.error('❌ Error fetching product:', error);
     res.status(500).json({ 
       success: false,
-      message: error.message 
+      message: 'Internal server error'
     });
   }
 });
@@ -138,16 +158,19 @@ app.get('/api/products/:id', async (req, res) => {
 // Create new product with image
 app.post('/api/products', upload.single('image'), async (req, res) => {
   try {
-    console.log('📦 Creating new product...');
-    console.log('Request body:', req.body);
-    console.log('Request file:', req.file);
-
     const { title, category, price, offerPrice, features } = req.body;
     
+    // ✅ Input validation
+    if (!title || !category || !price || !offerPrice) {
+      return res.status(400).json({
+        success: false,
+        message: 'Title, category, price, and offerPrice are required'
+      });
+    }
+
     let imagePath = '';
     if (req.file) {
       imagePath = `/uploads/${req.file.filename}`;
-      console.log('✅ Image saved at:', imagePath);
     }
 
     // Parse features
@@ -168,16 +191,15 @@ app.post('/api/products', upload.single('image'), async (req, res) => {
     featuresArray = featuresArray.filter(feature => feature && feature.trim() !== '');
 
     const newProduct = new Product({
-      title: title || '',
-      category: category || '',
-      price: Number(price) || 0,
-      offerPrice: Number(offerPrice) || 0,
+      title: title.trim(),
+      category: category.trim(),
+      price: Number(price),
+      offerPrice: Number(offerPrice),
       features: featuresArray,
       image: imagePath
     });
 
     const savedProduct = await newProduct.save();
-    console.log('✅ Product saved to database:', savedProduct._id);
     
     res.status(201).json({
       success: true,
@@ -196,15 +218,19 @@ app.post('/api/products', upload.single('image'), async (req, res) => {
 // Update product with image
 app.put('/api/products/:id', upload.single('image'), async (req, res) => {
   try {
-    console.log('🔄 Updating product...');
-    console.log('Request body:', req.body);
-    console.log('Request file:', req.file);
+    // ✅ MongoDB ID validation
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Invalid product ID' 
+      });
+    }
 
     const { title, category, price, offerPrice, features } = req.body;
     
     const updateData = {
-      title: title || '',
-      category: category || '',
+      title: title?.trim() || '',
+      category: category?.trim() || '',
       price: Number(price) || 0,
       offerPrice: Number(offerPrice) || 0
     };
@@ -226,7 +252,6 @@ app.put('/api/products/:id', upload.single('image'), async (req, res) => {
     // If new image is uploaded
     if (req.file) {
       updateData.image = `/uploads/${req.file.filename}`;
-      console.log('✅ New image saved at:', updateData.image);
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -242,7 +267,6 @@ app.put('/api/products/:id', upload.single('image'), async (req, res) => {
       });
     }
 
-    console.log('✅ Product updated:', updatedProduct._id);
     res.json({
       success: true,
       message: 'Product updated successfully',
@@ -260,6 +284,14 @@ app.put('/api/products/:id', upload.single('image'), async (req, res) => {
 // Delete product
 app.delete('/api/products/:id', async (req, res) => {
   try {
+    // ✅ MongoDB ID validation
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Invalid product ID' 
+      });
+    }
+
     const deletedProduct = await Product.findByIdAndDelete(req.params.id);
     
     if (!deletedProduct) {
@@ -274,9 +306,10 @@ app.delete('/api/products/:id', async (req, res) => {
       message: 'Product deleted successfully' 
     });
   } catch (error) {
+    console.error('❌ Error deleting product:', error);
     res.status(500).json({ 
       success: false,
-      message: error.message 
+      message: 'Internal server error'
     });
   }
 });
@@ -294,9 +327,10 @@ app.get('/api/products/category/:category', async (req, res) => {
       data: products
     });
   } catch (error) {
+    console.error('❌ Error fetching products by category:', error);
     res.status(500).json({ 
       success: false,
-      message: error.message 
+      message: 'Internal server error'
     });
   }
 });
@@ -339,9 +373,9 @@ app.use((error, req, res, next) => {
   }
   res.status(500).json({
     success: false,
-    message: error.message
+    message: 'Internal server error'
   });
 });
 
-// Vercel-এর জন্য export করুন
+// ✅ Vercel-এর জন্য export
 export default app;
