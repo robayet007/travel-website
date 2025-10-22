@@ -1,6 +1,5 @@
 import React from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
-
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 
 // Public pages
 import Home from './pages/Home'
@@ -13,25 +12,29 @@ import TourPackges from './pages/TourPackges'
 import InternationalTourPackage from './pages/InternationalTourPackage'
 import DomesticTourPackage from './pages/DomesticTourPackage'
 
-// Admin
+// Admin Components
 import Admin from './pages/Admin'
-import Umrah from './pages/Umrah'
-import HajjPackage from './pages/HajjPackage'
-import International from './pages/International'
-import Domestic from './pages/Domestic'
+import AdminLogin from './component/Admin/Login'
 
 // Layout components
 import Navbar from './component/Navbar'
 import Slider from './component/Slider'
 import Footer from './component/Footer'
 
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  return isLoggedIn ? children : <Navigate to="/admin/login" />;
+};
+
 function App() {
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin')
+  const isLoginPage = location.pathname === '/admin/login'
 
   return (
     <>
-      {/* Public layout */}
+      {/* Public layout - don't show for admin routes except login */}
       {!isAdminRoute && <Navbar />}
       {!isAdminRoute && <Slider />}
 
@@ -48,21 +51,25 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/landServices" element={<LandServices />} />
 
-          {/* Admin dashboard with nested routes */}
-          <Route path="/admin/*" element={<Admin />}>
-            <Route index element={<Umrah />} />
-            <Route path="umrah" element={<Umrah />} />
-            <Route path="hajj" element={<HajjPackage />} />
-            <Route path="international" element={<International />} />
-            <Route path="domestic" element={<Domestic />} />
-          </Route>
+          {/* Admin Login (Public route) */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+
+          {/* Protected Admin Dashboard with nested routes */}
+          <Route 
+            path="/admin/*" 
+            element={
+              <ProtectedRoute>
+                <Admin />
+              </ProtectedRoute>
+            } 
+          />
 
           {/* Fallback */}
-          <Route path="*" element={<div className="mt-10 text-2xl text-center text-white">Page Not Found</div>} />
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>
 
-      {/* Public footer */}
+      {/* Public footer - don't show for admin routes */}
       {!isAdminRoute && <Footer />}
     </>
   )

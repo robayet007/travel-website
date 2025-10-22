@@ -1,137 +1,85 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 export default function Hajj() {
-  // ==================== DATA ====================
-  const umrahPackages = [
-    {
-      id: 1,
-      title: "Basic",
-      oldPrice: "BDT 1,60,000",
-      newPrice: "BDT 1,29,999",
-      image: "/umrah-basic.jpg",
-      features: [
-        "✅ ১৫ দিনের সফর (আসা-যাওয়া সহ)",
-        "✅ হোটেল দূরত্ব: মক্কা ৬০০মিঃ / মদিনা ৭০০মিঃ",
-        "✅ সরাসরি ফ্লাইট (বিমান/সৌদি এয়ারলাইন্স)",
-        "✅ ৩ বেলা মানসম্মত খাবার",
-        "✅ ২৪ ঘণ্টা চিকিৎসা সেবা",
-        "✅ এক সফরে একাধিক ওমরা",
-        "✅ অভিজ্ঞ মোয়াল্লেম দ্বারা পরিচালনা",
-      ],
-    },
-    {
-      id: 2,
-      title: "Standard",
-      oldPrice: "BDT 2,00,000",
-      newPrice: "BDT 1,49,999",
-      image: "/umrah-standard.jpg",
-      features: [
-        "✅ ১৫ দিনের সফর",
-        "✅ হোটেল দূরত্ব: মক্কা ৩৫০মিঃ / মদিনা ৪০০মিঃ",
-        "✅ সৌদি এয়ারলাইন্স ফ্লাইট",
-        "✅ ৩ বেলা খাবার",
-        "✅ ২৪ ঘণ্টা চিকিৎসা সেবা",
-        "✅ একাধিক ওমরা সুযোগ",
-        "✅ ঐতিহাসিক স্থান ভ্রমণ",
-      ],
-    },
-    {
-      id: 3,
-      title: "Premium",
-      oldPrice: "BDT 2,50,000",
-      newPrice: "BDT 1,85,000",
-      image: "/umrah-premium.jpg",
-      features: [
-        "✅ ১৫ দিনের সফর",
-        "✅ হোটেল দূরত্ব: মক্কা ০মিঃ / মদিনা ০মিঃ",
-        "✅ সৌদি এয়ারলাইন্স ফ্লাইট",
-        "✅ ৩ বেলা খাবার",
-        "✅ ২৪ ঘণ্টা চিকিৎসা সেবা",
-        "✅ একাধিক ওমরা সুযোগ",
-        "✅ অভিজ্ঞ মোয়াল্লেম দ্বারা পরিচালনা",
-      ],
-    },
-  ];
+  const [umrahPackages, setUmrahPackages] = useState([]);
+  const [hajjPackages, setHajjPackages] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const hajjPackages = [
-    {
-      id: 1,
-      title: "Basic",
-      oldPrice: "BDT 6,30,000",
-      newPrice: "BDT 6,00,000",
-      image: "/hajj-basic.jpg",
-      features: [
-        "✅ মক্কা ৫০০মিঃ / মদিনা ৮০০মিঃ",
-        "✅ উন্নতমানের এসি আবাসন",
-        "✅ সরাসরি ফ্লাইট",
-        "✅ দুই বেলা দেশীয় খাবার",
-        "✅ ২৪ ঘণ্টা চিকিৎসা সেবা",
-        "✅ প্রতি রুমে ৪/৬ জন",
-        "✅ অভিজ্ঞ মোয়াল্লেম পরিচালনা",
-      ],
-    },
-    {
-      id: 2,
-      title: "Standard",
-      oldPrice: "BDT 7,50,000",
-      newPrice: "BDT 6,99,999",
-      image: "/hajj-standard.jpg",
-      features: [
-        "✅ মক্কা ৫০০মিঃ / মদিনা ৪০০মিঃ",
-        "✅ এসি আবাসন",
-        "✅ সরাসরি ফ্লাইট",
-        "✅ তিন বেলা দেশীয় খাবার",
-        "✅ চিকিৎসা সেবা",
-        "✅ প্রতি রুমে ৪/৬ জন",
-        "✅ অভিজ্ঞ মোয়াল্লেম পরিচালনা",
-      ],
-    },
-    {
-      id: 3,
-      title: "Premium",
-      oldPrice: "BDT 8,80,000",
-      newPrice: "BDT 8,10,000",
-      image: "/hajj-premium.jpg",
-      features: [
-        "✅ মক্কা ০মিঃ / মদিনা ০মিঃ",
-        "✅ এসি আবাসন",
-        "✅ সৌদি এয়ারলাইন্স ফ্লাইট",
-        "✅ নিজস্ব বাবুর্চি দ্বারা খাবার",
-        "✅ চিকিৎসা সেবা",
-        "✅ নিজস্ব চাহিদা অনুযায়ী সেবা",
-        "✅ অভিজ্ঞ মোয়াল্লেম পরিচালনা",
-      ],
-    },
-  ];
+  // Fetch packages from API
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch Umrah packages
+        const umrahResponse = await axios.get('http://localhost:5000/api/products/category/holy-umrah-hajj');
+        setUmrahPackages(umrahResponse.data.data);
+        
+        // Fetch Hajj packages  
+        const hajjResponse = await axios.get('http://localhost:5000/api/products/category/holy-hajj');
+        setHajjPackages(hajjResponse.data.data);
+        
+      } catch (error) {
+        console.error('Error fetching packages:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPackages();
+  }, []);
 
   // ==================== CARD COMPONENT ====================
   const PackageCard = ({ pkg }) => (
     <div className="flex flex-col justify-between p-6 bg-white border border-gray-200 shadow-lg rounded-[20px] hover:shadow-xl group">
       <div>
+        {/* Image Section */}
         <div className="overflow-hidden rounded-[20px] h-80 mb-4 -mx-6 -mt-6">
-          <img
-            src={pkg.image}
-            alt={pkg.title}
-            className="object-cover object-center w-full h-full transition-transform duration-300 ease-out group-hover:scale-105"
-          />
+          {pkg.image ? (
+            <img
+              src={`http://localhost:5000${pkg.image}`}
+              alt={pkg.title}
+              className="object-cover object-center w-full h-full transition-transform duration-300 ease-out group-hover:scale-105"
+              onError={(e) => {
+                e.target.src = 'https://via.placeholder.com/300x400?text=No+Image';
+              }}
+            />
+          ) : (
+            <div className="flex items-center justify-center w-full h-full bg-gray-300">
+              <span className="text-gray-500">No Image</span>
+            </div>
+          )}
         </div>
+        
+        {/* Title */}
         <h3 className="text-xl font-semibold text-center text-gray-900">
           {pkg.title}
         </h3>
-        <div className="mt-4">
+        
+        {/* Prices - API data use করবে */}
+        <div className="mt-4 text-center">
           <span className="text-base font-extrabold text-gray-900 line-through border border-orange-300 rounded-md px-2 py-0.5">
-            {pkg.oldPrice}
+            ৳{pkg.price}
           </span>
           <span className="ml-3 text-[2rem] font-extrabold text-orange-600">
-            {pkg.newPrice}
+            ৳{pkg.offerPrice}
           </span>
         </div>
+        
+        {/* Features - API data use করবে */}
         <ul className="mt-6 space-y-2 text-gray-700">
-          {pkg.features.map((f, i) => (
-            <li key={i}>{f}</li>
+          {pkg.features && pkg.features.slice(0, 6).map((feature, index) => (
+            <li key={index} className="flex items-start">
+              <span className="mr-2">✅</span>
+              <span>{feature}</span>
+            </li>
           ))}
         </ul>
       </div>
+      
+      {/* Book Now Button */}
       <Link
         to="/contact"
         className="inline-block px-5 py-3 mt-8 font-medium text-center text-white transition duration-700 ease-in-out rounded-lg bg-gradient-to-r from-purple-800 via-pink-600 to-orange-500 hover:text-blue-600 hover:opacity-90 hover:scale-[1.05]"
@@ -140,6 +88,15 @@ export default function Hajj() {
       </Link>
     </div>
   );
+
+  // Loading State
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-xl text-gray-600">Loading packages...</div>
+      </div>
+    );
+  }
 
   // ==================== RETURN ====================
   return (
@@ -152,11 +109,18 @@ export default function Hajj() {
           </h1>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {umrahPackages.map((pkg) => (
-            <PackageCard key={pkg.id} pkg={pkg} />
-          ))}
-        </div>
+        {umrahPackages.length > 0 ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {umrahPackages.map((pkg) => (
+              <PackageCard key={pkg._id} pkg={pkg} />
+            ))}
+          </div>
+        ) : (
+          <div className="py-12 text-center">
+            <p className="text-xl text-gray-600">No Umrah packages available yet</p>
+            <p className="mt-2 text-gray-500">Check back later for amazing Umrah packages</p>
+          </div>
+        )}
 
         {/* Hajj Section */}
         <div className="mt-16 mb-12 text-center">
@@ -165,11 +129,18 @@ export default function Hajj() {
           </h2>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {hajjPackages.map((pkg) => (
-            <PackageCard key={pkg.id} pkg={pkg} />
-          ))}
-        </div>
+        {hajjPackages.length > 0 ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {hajjPackages.map((pkg) => (
+              <PackageCard key={pkg._id} pkg={pkg} />
+            ))}
+          </div>
+        ) : (
+          <div className="py-12 text-center">
+            <p className="text-xl text-gray-600">No Hajj packages available yet</p>
+            <p className="mt-2 text-gray-500">Check back later for amazing Hajj packages</p>
+          </div>
+        )}
       </section>
 
       {/* Agency Info */}
@@ -178,6 +149,9 @@ export default function Hajj() {
           src="/agency-info.jpg"
           alt="Agency Info"
           className="w-full h-full transition-transform duration-700 ease-in-out transform hover:scale-[1.05]"
+          onError={(e) => {
+            e.target.src = 'https://via.placeholder.com/800x400?text=Travel+Agency';
+          }}
         />
       </div>
     </>
