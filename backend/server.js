@@ -21,7 +21,7 @@ app.get('/test', (req, res) => {
 });
 
 // ✅ MongoDB Connection with PROPER SETTINGS
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://mohammadrobayet009_db_user:vkWbkhEYvOaGuv9i@cluster0.a9bbtmw.mongodb.net/admin_dashboard?retryWrites=true&w=majority&appName=Cluster0";
+const MONGODB_URI = process.env.MONGODB_URI
 
 console.log('🔗 Connecting to MongoDB...');
 
