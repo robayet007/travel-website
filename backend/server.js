@@ -25,22 +25,34 @@ cloudinary.config({
   secure: true
 });
 
-// CORS
+// ✅ CORS Configuration - Fixed with your domain
 app.use(cors({
-  origin: "*",
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://travel-website-khaki-three.vercel.app",
+    "https://www.flyeasytravelsbd.com",
+    "https://flyeasytravelsbd.com"
+  ],
+  credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"]
 }));
 
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// ✅ Handle preflight requests
+app.options('*', cors());
 
-// ✅ MULTER CONFIGURATION (Memory Storage)
+// ✅ Middleware with increased limits
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// ✅ MULTER CONFIGURATION with larger size
 const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  limits: { 
+    fileSize: 10 * 1024 * 1024 // 10MB limit
+  },
   fileFilter: function (req, file, cb) {
     const allowedTypes = /jpeg|jpg|png|gif|webp/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
@@ -95,7 +107,7 @@ const productSchema = new mongoose.Schema({
   offerPrice: { type: Number, required: true, min: 0 },
   features: [{ type: String, trim: true }],
   image: { type: String, default: '' },
-  cloudinaryId: { type: String, default: '' } // ✅ Cloudinary ID store করবো
+  cloudinaryId: { type: String, default: '' }
 }, { timestamps: true });
 
 const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
@@ -368,7 +380,6 @@ app.delete('/api/products/:id', async (req, res) => {
 // Test Cloudinary Connection
 app.get('/test-cloudinary', async (req, res) => {
   try {
-    // Simple test to check Cloudinary connection
     const result = await cloudinary.api.ping();
     res.json({
       success: true,
@@ -425,6 +436,15 @@ app.get('/', (req, res) => {
       createProduct: 'POST /api/products (with Cloudinary upload)',
       updateProduct: 'PUT /api/products/:id (with Cloudinary upload)',
       deleteProduct: 'DELETE /api/products/:id'
+    },
+    cors: {
+      allowedOrigins: [
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://travel-website-khaki-three.vercel.app", 
+        "https://www.flyeasytravelsbd.com",
+        "https://flyeasytravelsbd.com"
+      ]
     }
   });
 });
@@ -435,6 +455,7 @@ if (process.env.NODE_ENV !== 'production') {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📍 Local: http://localhost:${PORT}`);
     console.log(`☁️  Cloudinary configured for: dlfm2aqhc`);
+    console.log(`🌐 CORS enabled for: flyeasytravelsbd.com`);
   });
 }
 
