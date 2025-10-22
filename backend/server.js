@@ -7,7 +7,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 const app = express();
 
-// ✅ PORT ADD করুন
 const PORT = process.env.PORT || 5000;
 
 // CORS
@@ -21,99 +20,38 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Test route
-app.get('/test', (req, res) => {
-  res.json({ 
-    success: true,
-    message: '✅ Server is working!',
-    timestamp: new Date().toISOString()
-  });
-});
-
-// ✅ UPDATED MONGODB URI WITH NEW PASSWORD
+// ✅ MONGODB URI (Environment Variable থেকে নিন)
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://mohammadrobayet009_db_user:IlrLmx5F6iUVSLRY@cluster0.a9bbtmw.mongodb.net/admin_dashboard?retryWrites=true&w=majority&appName=Cluster0";
 
-console.log('🔗 Connecting to MongoDB with new password...');
+// ✅ Global connection variable for Vercel
+let cachedDb = null;
 
-let isConnected = false;
-let temporaryProducts = [];
-
-// ✅ IMPROVED CONNECTION FUNCTION
+// ✅ IMPROVED CONNECTION FOR VERCEL
 const connectDB = async () => {
+  if (cachedDb && mongoose.connection.readyState === 1) {
+    console.log('✅ Using cached MongoDB connection');
+    return cachedDb;
+  }
+
   try {
-    console.log('🔄 Attempting MongoDB connection...');
+    console.log('🔄 Connecting to MongoDB...');
     
-    await mongoose.connect(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 10000,
+    const conn = await mongoose.connect(MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      maxPoolSize: 10,
+      minPoolSize: 2,
     });
     
-    isConnected = true;
-    console.log('✅ MongoDB Connected Successfully with new password!');
-    
-    // ✅ যখন MongoDB connect হবে, temporary data save করবে
-    if (temporaryProducts.length > 0) {
-      console.log(`🔄 Saving ${temporaryProducts.length} temporary products to MongoDB...`);
-      await saveTemporaryToMongoDB();
-    }
+    cachedDb = conn;
+    console.log('✅ MongoDB Connected Successfully!');
+    return conn;
     
   } catch (error) {
     console.error('❌ MongoDB Connection Failed:', error.message);
-    isConnected = false;
-    
-    // Retry after 10 seconds
-    setTimeout(connectDB, 10000);
+    throw error;
   }
 };
-
-// ✅ FUNCTION TO SAVE TEMPORARY DATA TO MONGODB
-const saveTemporaryToMongoDB = async () => {
-  try {
-    let savedCount = 0;
-    for (const tempProduct of temporaryProducts) {
-      const existingProduct = await Product.findOne({ 
-        title: tempProduct.title,
-        category: tempProduct.category 
-      });
-      
-      if (!existingProduct) {
-        const newProduct = new Product({
-          title: tempProduct.title,
-          category: tempProduct.category,
-          price: tempProduct.price,
-          offerPrice: tempProduct.offerPrice,
-          features: tempProduct.features,
-          image: tempProduct.image
-        });
-        await newProduct.save();
-        savedCount++;
-        console.log('✅ Saved to MongoDB:', tempProduct.title);
-      }
-    }
-    console.log(`🎉 Successfully saved ${savedCount} products to MongoDB`);
-    
-    // Clear temporary storage after saving
-    temporaryProducts = [];
-    
-  } catch (error) {
-    console.error('❌ Error saving temporary data to MongoDB:', error.message);
-  }
-};
-
-// Start connection
-connectDB();
-
-// MongoDB connection events
-mongoose.connection.on('connected', () => {
-  console.log('✅ Mongoose connected to MongoDB');
-  isConnected = true;
-});
-
-mongoose.connection.on('error', (err) => {
-  console.error('❌ Mongoose connection error:', err);
-  isConnected = false;
-});
 
 // Product Schema
 const productSchema = new mongoose.Schema({
@@ -125,39 +63,39 @@ const productSchema = new mongoose.Schema({
   image: { type: String, default: '' }
 }, { timestamps: true });
 
-const Product = mongoose.model('Product', productSchema);
+// ✅ Model check করে নিন (Vercel-এ multiple initialization avoid করতে)
+const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
 
 // 📊 API Routes
+
+// Test route
+app.get('/test', (req, res) => {
+  res.json({ 
+    success: true,
+    message: '✅ Server is working!',
+    timestamp: new Date().toISOString()
+  });
+});
 
 // Get all products
 app.get('/api/products', async (req, res) => {
   try {
-    if (isConnected) {
-      // ✅ MongoDB থেকে data fetch করুন
-      const products = await Product.find().sort({ createdAt: -1 });
-      res.json({
-        success: true,
-        count: products.length,
-        data: products,
-        source: 'mongodb'
-      });
-    } else {
-      // ✅ Temporary storage থেকে data fetch করুন
-      res.json({
-        success: true,
-        count: temporaryProducts.length,
-        data: temporaryProducts,
-        source: 'temporary',
-        message: 'MongoDB connecting...'
-      });
-    }
-  } catch (error) {
-    console.error('❌ Error:', error.message);
+    await connectDB();
+    
+    const products = await Product.find().sort({ createdAt: -1 });
+    
     res.json({
       success: true,
-      count: temporaryProducts.length,
-      data: temporaryProducts,
-      source: 'temporary-fallback'
+      count: products.length,
+      data: products,
+      source: 'mongodb'
+    });
+  } catch (error) {
+    console.error('❌ Error fetching products:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch products',
+      error: error.message
     });
   }
 });
@@ -165,91 +103,138 @@ app.get('/api/products', async (req, res) => {
 // Create product
 app.post('/api/products', async (req, res) => {
   try {
+    await connectDB();
+    
     const { title, category, price, offerPrice, features } = req.body;
 
     if (!title || !category || !price || !offerPrice) {
-      return res.status(400).json({ success: false, message: 'All fields required' });
+      return res.status(400).json({ 
+        success: false, 
+        message: 'All fields required (title, category, price, offerPrice)' 
+      });
     }
 
-    const productData = {
-      _id: Date.now().toString(),
+    const newProduct = new Product({
       title: title.trim(),
       category: category.trim(),
       price: Number(price),
       offerPrice: Number(offerPrice),
       features: Array.isArray(features) ? features : [],
-      image: '',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
+      image: ''
+    });
 
-    // ✅ Always save to temporary storage first
-    temporaryProducts.unshift(productData);
-
-    // ✅ যদি MongoDB connected থাকে, তাহলে MongoDB-তেও save করুন
-    if (isConnected) {
-      try {
-        const newProduct = new Product(productData);
-        const savedProduct = await newProduct.save();
-        
-        res.status(201).json({
-          success: true,
-          message: 'Product created successfully! (Saved to MongoDB)',
-          data: savedProduct,
-          savedTo: 'mongodb'
-        });
-        return;
-      } catch (mongoError) {
-        console.log('⚠️ MongoDB save failed, but saved to temporary storage');
-      }
-    }
-
-    // ✅ Temporary storage response
+    const savedProduct = await newProduct.save();
+    
     res.status(201).json({
       success: true,
-      message: 'Product created successfully! (Saved to Temporary Storage)',
-      data: productData,
-      savedTo: 'temporary'
+      message: 'Product created successfully!',
+      data: savedProduct
     });
 
   } catch (error) {
-    console.error('❌ Error:', error);
-    res.status(400).json({ success: false, message: error.message });
+    console.error('❌ Error creating product:', error.message);
+    res.status(400).json({ 
+      success: false, 
+      message: 'Failed to create product',
+      error: error.message 
+    });
   }
 });
 
-// ✅ MANUAL MONGODB SAVE ENDPOINT
-app.get('/save-to-mongodb', async (req, res) => {
+// Update product
+app.put('/api/products/:id', async (req, res) => {
   try {
-    if (isConnected && temporaryProducts.length > 0) {
-      await saveTemporaryToMongoDB();
-      res.json({
-        success: true,
-        message: `Saved ${temporaryProducts.length} products to MongoDB`,
-        savedCount: temporaryProducts.length
-      });
-    } else {
-      res.json({
+    await connectDB();
+    
+    const { id } = req.params;
+    const updateData = req.body;
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({
         success: false,
-        message: isConnected ? 'No temporary products to save' : 'MongoDB not connected',
-        tempCount: temporaryProducts.length,
-        connected: isConnected
+        message: 'Product not found'
       });
     }
+
+    res.json({
+      success: true,
+      message: 'Product updated successfully',
+      data: updatedProduct
+    });
+
   } catch (error) {
-    res.json({ success: false, message: 'Error: ' + error.message });
+    console.error('❌ Error updating product:', error.message);
+    res.status(400).json({
+      success: false,
+      message: 'Failed to update product',
+      error: error.message
+    });
   }
 });
 
-// ✅ CHECK MONGODB STATUS
-app.get('/mongodb-status', (req, res) => {
-  res.json({
-    success: isConnected,
-    connected: isConnected,
-    temporaryProducts: temporaryProducts.length,
-    connectionState: mongoose.connection.readyState,
-    message: isConnected ? '✅ MongoDB Connected' : '❌ MongoDB Disconnected'
-  });
+// Delete product
+app.delete('/api/products/:id', async (req, res) => {
+  try {
+    await connectDB();
+    
+    const { id } = req.params;
+    const deletedProduct = await Product.findByIdAndDelete(id);
+
+    if (!deletedProduct) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Product deleted successfully',
+      data: deletedProduct
+    });
+
+  } catch (error) {
+    console.error('❌ Error deleting product:', error.message);
+    res.status(400).json({
+      success: false,
+      message: 'Failed to delete product',
+      error: error.message
+    });
+  }
+});
+
+// ✅ MongoDB Status Check
+app.get('/mongodb-status', async (req, res) => {
+  try {
+    await connectDB();
+    const state = mongoose.connection.readyState;
+    const states = {
+      0: 'Disconnected',
+      1: 'Connected',
+      2: 'Connecting',
+      3: 'Disconnecting'
+    };
+
+    res.json({
+      success: true,
+      connected: state === 1,
+      connectionState: states[state],
+      message: state === 1 ? '✅ MongoDB Connected' : '❌ MongoDB Disconnected'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      connected: false,
+      message: '❌ MongoDB Connection Failed',
+      error: error.message
+    });
+  }
 });
 
 // Home route
@@ -257,19 +242,18 @@ app.get('/', (req, res) => {
   res.json({ 
     success: true,
     message: '🛍️ Travel Admin API is running!',
-    mongodb: isConnected ? '✅ Connected' : '❌ Disconnected',
-    temporaryProducts: temporaryProducts.length,
     endpoints: {
       test: 'GET /test',
       mongodbStatus: 'GET /mongodb-status',
-      saveToMongoDB: 'GET /save-to-mongodb',
       getAllProducts: 'GET /api/products',
-      createProduct: 'POST /api/products'
+      createProduct: 'POST /api/products',
+      updateProduct: 'PUT /api/products/:id',
+      deleteProduct: 'DELETE /api/products/:id'
     }
   });
 });
 
-// ✅ PORT LISTENER ADD করুন (Vercel-এ ignore হবে)
+// ✅ Local development only
 if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
@@ -277,4 +261,5 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
+// ✅ Vercel export
 export default app;
