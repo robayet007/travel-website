@@ -3,13 +3,8 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import multer from 'multer';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { v2 as cloudinary } from 'cloudinary';
-
-// ES Module এ __dirname fix
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
 // Initialize
 dotenv.config();
@@ -17,54 +12,38 @@ const app = express();
 
 const PORT = process.env.PORT || 5000;
 
-// ✅ Cloudinary Configuration
+// ✅ CLOUDINARY CONFIGURATION
 cloudinary.config({
-  cloud_name: 'dlfm2aqhc',
-  api_key: '759567457719666',
-  api_secret: 'doUZk7ZTa3w5SJehy0dwdAPssEM',
-  secure: true
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'YOUR_CLOUD_NAME', // Cloudinary dashboard থেকে নিন
+  api_key: process.env.CLOUDINARY_API_KEY || '759567457719666',
+  api_secret: process.env.CLOUDINARY_API_SECRET || 'doUZk7ZTa3w5SJehy0dwdAPssEM'
 });
 
-// ✅ CORS Configuration - Fixed with your domain
-app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "https://travel-website-khaki-three.vercel.app",
-    "https://www.flyeasytravelsbd.com",
-    "https://flyeasytravelsbd.com"
-  ],
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"]
-}));
-
-// ✅ Handle preflight requests
-app.options('*', cors());
-
-// ✅ Middleware with increased limits
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// ✅ MULTER CONFIGURATION with larger size
-const storage = multer.memoryStorage();
-const upload = multer({
-  storage: storage,
-  limits: { 
-    fileSize: 10 * 1024 * 1024 // 10MB limit
-  },
-  fileFilter: function (req, file, cb) {
-    const allowedTypes = /jpeg|jpg|png|gif|webp/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-
-    if (mimetype && extname) {
-      return cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed!'));
-    }
+// ✅ MULTER CLOUDINARY STORAGE
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'travel-packages', // Cloudinary folder name
+    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+    transformation: [{ width: 800, height: 600, crop: 'limit' }] // Auto resize
   }
 });
+
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
+
+// CORS
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // MONGODB URI
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://mohammadrobayet009_db_user:IlrLmx5F6iUVSLRY@cluster0.a9bbtmw.mongodb.net/admin_dashboard?retryWrites=true&w=majority&appName=Cluster0";
@@ -106,43 +85,11 @@ const productSchema = new mongoose.Schema({
   price: { type: Number, required: true, min: 0 },
   offerPrice: { type: Number, required: true, min: 0 },
   features: [{ type: String, trim: true }],
-  image: { type: String, default: '' },
-  cloudinaryId: { type: String, default: '' }
+  image: { type: String, default: '' }, // Cloudinary URL
+  cloudinaryId: { type: String, default: '' } // Cloudinary public_id for deletion
 }, { timestamps: true });
 
 const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
-
-// ✅ Cloudinary Upload Helper Function
-const uploadToCloudinary = (fileBuffer) => {
-  return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: 'travel-products',
-        resource_type: 'auto'
-      },
-      (error, result) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(result);
-        }
-      }
-    );
-    
-    uploadStream.end(fileBuffer);
-  });
-};
-
-// ✅ Cloudinary Delete Helper Function
-const deleteFromCloudinary = async (publicId) => {
-  try {
-    const result = await cloudinary.uploader.destroy(publicId);
-    return result;
-  } catch (error) {
-    console.error('Error deleting from Cloudinary:', error);
-    throw error;
-  }
-};
 
 // 📊 API Routes
 
@@ -178,7 +125,7 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
-// ✅ CREATE PRODUCT WITH CLOUDINARY UPLOAD
+// ✅ CREATE PRODUCT WITH CLOUDINARY IMAGE UPLOAD
 app.post('/api/products', upload.single('image'), async (req, res) => {
   try {
     await connectDB();
@@ -192,7 +139,7 @@ app.post('/api/products', upload.single('image'), async (req, res) => {
       });
     }
 
-    // ✅ Parse features
+    // Parse features
     let parsedFeatures = [];
     if (features) {
       try {
@@ -202,34 +149,14 @@ app.post('/api/products', upload.single('image'), async (req, res) => {
       }
     }
 
-    let imageUrl = '';
-    let cloudinaryId = '';
-
-    // ✅ যদি image upload করা হয়
-    if (req.file) {
-      try {
-        const result = await uploadToCloudinary(req.file.buffer);
-        imageUrl = result.secure_url;
-        cloudinaryId = result.public_id;
-        console.log('✅ Image uploaded to Cloudinary:', imageUrl);
-      } catch (uploadError) {
-        console.error('❌ Cloudinary upload failed:', uploadError);
-        return res.status(500).json({
-          success: false,
-          message: 'Image upload failed',
-          error: uploadError.message
-        });
-      }
-    }
-
     const newProduct = new Product({
       title: title.trim(),
       category: category.trim(),
       price: Number(price),
       offerPrice: Number(offerPrice),
       features: parsedFeatures,
-      image: imageUrl,
-      cloudinaryId: cloudinaryId
+      image: req.file ? req.file.path : '', // Cloudinary URL
+      cloudinaryId: req.file ? req.file.filename : '' // Cloudinary public_id
     });
 
     const savedProduct = await newProduct.save();
@@ -250,7 +177,7 @@ app.post('/api/products', upload.single('image'), async (req, res) => {
   }
 });
 
-// ✅ UPDATE PRODUCT WITH CLOUDINARY
+// ✅ UPDATE PRODUCT WITH CLOUDINARY IMAGE UPLOAD
 app.put('/api/products/:id', upload.single('image'), async (req, res) => {
   try {
     await connectDB();
@@ -258,7 +185,6 @@ app.put('/api/products/:id', upload.single('image'), async (req, res) => {
     const { id } = req.params;
     const { title, category, price, offerPrice, features } = req.body;
 
-    // Find existing product
     const existingProduct = await Product.findById(id);
     if (!existingProduct) {
       return res.status(404).json({
@@ -286,29 +212,20 @@ app.put('/api/products/:id', upload.single('image'), async (req, res) => {
       features: parsedFeatures
     };
 
-    // ✅ যদি নতুন image upload হয়
+    // যদি নতুন image upload হয়
     if (req.file) {
-      try {
-        // পুরনো image Cloudinary থেকে delete করুন
-        if (existingProduct.cloudinaryId) {
-          await deleteFromCloudinary(existingProduct.cloudinaryId);
+      // পুরনো Cloudinary image delete করুন
+      if (existingProduct.cloudinaryId) {
+        try {
+          await cloudinary.uploader.destroy(existingProduct.cloudinaryId);
           console.log('✅ Old image deleted from Cloudinary');
+        } catch (error) {
+          console.log('⚠️ Failed to delete old image:', error.message);
         }
-
-        // নতুন image upload করুন
-        const result = await uploadToCloudinary(req.file.buffer);
-        updateData.image = result.secure_url;
-        updateData.cloudinaryId = result.public_id;
-        console.log('✅ New image uploaded to Cloudinary');
-        
-      } catch (uploadError) {
-        console.error('❌ Cloudinary upload failed:', uploadError);
-        return res.status(500).json({
-          success: false,
-          message: 'Image update failed',
-          error: uploadError.message
-        });
       }
+      
+      updateData.image = req.file.path;
+      updateData.cloudinaryId = req.file.filename;
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -333,7 +250,7 @@ app.put('/api/products/:id', upload.single('image'), async (req, res) => {
   }
 });
 
-// ✅ DELETE PRODUCT WITH CLOUDINARY
+// ✅ DELETE PRODUCT WITH CLOUDINARY IMAGE DELETION
 app.delete('/api/products/:id', async (req, res) => {
   try {
     await connectDB();
@@ -348,14 +265,13 @@ app.delete('/api/products/:id', async (req, res) => {
       });
     }
 
-    // ✅ Cloudinary থেকে image delete করুন
+    // Delete image from Cloudinary
     if (product.cloudinaryId) {
       try {
-        await deleteFromCloudinary(product.cloudinaryId);
+        await cloudinary.uploader.destroy(product.cloudinaryId);
         console.log('✅ Image deleted from Cloudinary');
-      } catch (deleteError) {
-        console.error('❌ Cloudinary delete failed:', deleteError);
-        // Continue with product deletion even if image delete fails
+      } catch (error) {
+        console.log('⚠️ Failed to delete image:', error.message);
       }
     }
 
@@ -372,24 +288,6 @@ app.delete('/api/products/:id', async (req, res) => {
     res.status(400).json({
       success: false,
       message: 'Failed to delete product',
-      error: error.message
-    });
-  }
-});
-
-// Test Cloudinary Connection
-app.get('/test-cloudinary', async (req, res) => {
-  try {
-    const result = await cloudinary.api.ping();
-    res.json({
-      success: true,
-      message: '✅ Cloudinary connected successfully!',
-      cloudinary: result
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: '❌ Cloudinary connection failed',
       error: error.message
     });
   }
@@ -431,20 +329,10 @@ app.get('/', (req, res) => {
     endpoints: {
       test: 'GET /test',
       mongodbStatus: 'GET /mongodb-status',
-      cloudinaryTest: 'GET /test-cloudinary',
       getAllProducts: 'GET /api/products',
-      createProduct: 'POST /api/products (with Cloudinary upload)',
-      updateProduct: 'PUT /api/products/:id (with Cloudinary upload)',
+      createProduct: 'POST /api/products (with image upload)',
+      updateProduct: 'PUT /api/products/:id (with image upload)',
       deleteProduct: 'DELETE /api/products/:id'
-    },
-    cors: {
-      allowedOrigins: [
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "https://travel-website-khaki-three.vercel.app", 
-        "https://www.flyeasytravelsbd.com",
-        "https://flyeasytravelsbd.com"
-      ]
     }
   });
 });
@@ -454,8 +342,6 @@ if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📍 Local: http://localhost:${PORT}`);
-    console.log(`☁️  Cloudinary configured for: dlfm2aqhc`);
-    console.log(`🌐 CORS enabled for: flyeasytravelsbd.com`);
   });
 }
 
